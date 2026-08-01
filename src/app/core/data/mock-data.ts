@@ -129,7 +129,7 @@ export const BUSINESSES: Business[] = [
 ];
 
 export const COMMUNITY_NEWS: CommunityNotice[] = [
-  { id: 'n1', title: 'Jumma khutbah moved to 1:15 PM', body: 'Masjid-e-Noor has adjusted this week\u2019s khutbah timing.', postedAt: '2h ago' },
+  { id: 'n1', title: 'Jumma khutbah shifted to 1:15 PM', body: 'Masjid-e-Noor has adjusted this week\u2019s khutbah timing.', postedAt: '2h ago' },
   { id: 'n2', title: 'Taraweeh streamed live tonight', body: 'Central Jama Masjid is livestreaming tonight\u2019s Taraweeh.', postedAt: '5h ago' },
 ];
 
