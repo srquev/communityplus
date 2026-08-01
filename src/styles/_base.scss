@@ -1,0 +1,74 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: #e9eaea;
+  font-family: var(--font-body);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, p {
+  margin: 0;
+  font-family: var(--font-body);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+// utility classes reused across feature templates
+.section-title {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.meta {
+  font-size: 11.5px;
+  color: var(--ink-soft);
+}
+
+.title-sm {
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: 14px;
+}
+
+.divider {
+  height: 1px;
+  background: var(--line);
+  margin: 4px 0 14px;
+  border: none;
+}
+
+// scrollbars hidden on horizontal scroll rows (mobile pattern)
+.scroll-row {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

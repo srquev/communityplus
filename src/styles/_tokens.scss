@@ -1,0 +1,41 @@
+// Design tokens — mirrors the product's visual design pass.
+// One signature element (sky bands) + a quiet, flat system everywhere else.
+:root {
+  // surfaces & text
+  --ink: #12151c;
+  --ink-soft: #5b6470;
+  --ink-faint: #9ba3af;
+  --cloud: #f6f7f9;
+  --card: #ffffff;
+  --line: #e5e8ed;
+
+  // brand + roles
+  --emerald: #1b4b43;
+  --emerald-ink: #123832;
+  --emerald-bg: #e4edeb;
+  --gold: #c99a3d;
+  --gold-ink: #7a5a20;
+  --gold-bg: #fbf2e1;
+  --brick: #b85a45;
+  --brick-bg: #f6e7e3;
+
+  // sky-band gradients — tied to prayer times / time of day
+  --sky-fajr: linear-gradient(135deg, #2b3a67, #5b6fa0);
+  --sky-zuhr: linear-gradient(135deg, #3e8fc4, #7ec1e0);
+  --sky-asr: linear-gradient(135deg, #d99a3e, #efc272);
+  --sky-maghrib: linear-gradient(135deg, #c15a3e, #e0954a);
+  --sky-isha: linear-gradient(135deg, #12172b, #2b3a67);
+
+  // type
+  --font-display: 'Fraunces', serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  // radii
+  --r-lg: 20px;
+  --r-md: 16px;
+  --r-sm: 12px;
+  --r-pill: 999px;
+
+  // layout
+  --max-app-width: 480px;
+}
