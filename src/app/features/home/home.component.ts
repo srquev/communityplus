@@ -19,7 +19,7 @@ import { SkyBandComponent } from '../../shared/components/sky-band.component';
     SectionHeaderComponent, ListCardComponent, BusinessCardComponent,
   ],
   template: `
-    <app-header-bar mode="home" [city]="user.selectedCityId() | titlecase" />
+    <app-header-bar mode="home" [city]="user.profile().city" />
 
     <app-sky-band
       [band]="prayer.skyBand()"

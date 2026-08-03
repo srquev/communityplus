@@ -21,16 +21,16 @@ import { SkyBand } from '../../core/services/prayer.service';
     </div>
   `,
   styles: [`
-    .sky-band { margin: 14px 18px 0; border-radius: 20px; padding: 20px 20px 22px; color: #fff; }
+    .sky-band { margin: 10px 18px 0; border-radius: 18px; padding: 16px 16px 18px; color: #fff; box-shadow: 0 16px 30px rgba(18, 21, 28, 0.12); }
     .fajr { background: var(--sky-fajr); }
     .zuhr { background: var(--sky-zuhr); }
     .asr { background: var(--sky-asr); }
     .maghrib { background: var(--sky-maghrib); }
     .isha { background: var(--sky-isha); }
-    .tag { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; opacity: .85; }
-    .time { font-family: var(--font-display); font-weight: 500; font-size: 38px; line-height: 1.1; margin-top: 6px; }
-    .sub { font-size: 12.5px; opacity: .9; margin-top: 4px; }
-    .arc-track { margin-top: 16px; height: 4px; border-radius: 99px; background: rgba(255,255,255,.3); position: relative; }
+    .tag { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; opacity: .9; }
+    .time { font-family: var(--font-display); font-weight: 500; font-size: 30px; line-height: 1.1; margin-top: 6px; }
+    .sub { font-size: 12px; opacity: .92; margin-top: 4px; }
+    .arc-track { margin-top: 14px; height: 4px; border-radius: 99px; background: rgba(255,255,255,.3); position: relative; }
     .arc-fill { position: absolute; left: 0; top: 0; height: 100%; border-radius: 99px; background: #fff; }
     .arc-dot { position: absolute; top: 50%; width: 12px; height: 12px; border-radius: 50%; background: #fff; transform: translate(-50%, -50%); box-shadow: 0 0 0 4px rgba(255,255,255,.25); }
     .arc-labels { display: flex; justify-content: space-between; margin-top: 8px; font-size: 10px; opacity: .85; }
@@ -45,3 +45,5 @@ export class SkyBandComponent {
   startLabel = input('Fajr');
   endLabel = input('Isha');
 }
+
+
