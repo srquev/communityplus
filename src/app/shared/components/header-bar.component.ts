@@ -33,7 +33,7 @@ import { IconComponent } from '../icon/icon.component';
     }
   `,
   styles: [`
-    .header { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px 4px; }
+    .header { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px 6px; }
     .place { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: var(--emerald); }
     .city-select {
       background: transparent; border: 0; color: inherit; font: inherit; font-weight: 700;
@@ -41,10 +41,11 @@ import { IconComponent } from '../icon/icon.component';
     }
     .city-select option { color: var(--ink); }
     .icons { display: flex; gap: 8px; }
-    .title { font-size: 15px; font-weight: 700; }
+    .title { font-size: 15px; font-weight: 700; color: var(--ink); }
     .icon-btn {
-      width: 34px; height: 34px; border-radius: 11px; background: var(--card); border: 1px solid var(--line);
-      display: flex; align-items: center; justify-content: center; color: var(--ink);
+      width: 36px; height: 36px; border-radius: 12px; background: linear-gradient(135deg, var(--card), var(--cloud));
+      border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; color: var(--ink);
+      box-shadow: 0 8px 16px rgba(18, 21, 28, 0.04);
     }
   `],
 })
