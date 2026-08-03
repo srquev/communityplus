@@ -3,6 +3,24 @@ export interface City {
   name: string;
 }
 
+export interface CityScheduleMasjid {
+  id: string;
+  name: string;
+  address: string;
+  namazTimes: PrayerTiming[];
+}
+
+export interface CityPrayerSchedule {
+  id: string;
+  name: string;
+  hijriDate: string;
+  ramadanDay: number;
+  sehriEnd: string;
+  iftar: string;
+  timings: PrayerTiming[];
+  masjids: CityScheduleMasjid[];
+}
+
 export type PrayerName = 'Fajr' | 'Zuhr' | 'Asr' | 'Maghrib' | 'Isha';
 
 export interface PrayerTiming {

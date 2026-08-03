@@ -1,5 +1,6 @@
 import { Location } from '@angular/common';
 import { Component, inject, input, output } from '@angular/core';
+import { UserService } from '../../core/services/user.service';
 import { IconComponent } from '../icon/icon.component';
 
 @Component({
@@ -10,7 +11,11 @@ import { IconComponent } from '../icon/icon.component';
       <div class="header">
         <div class="place">
           <app-icon name="pin" [size]="14" />
-          {{ city() }}
+          <select class="city-select" [value]="user.selectedCityId()" (change)="onCityChange($event)">
+            @for (city of user.cities(); track city.id) {
+              <option [value]="city.id">{{ city.name }}</option>
+            }
+          </select>
         </div>
         <div class="icons">
           <button type="button" class="icon-btn" (click)="searchClick.emit()"><app-icon name="search" [size]="16" /></button>
@@ -30,6 +35,11 @@ import { IconComponent } from '../icon/icon.component';
   styles: [`
     .header { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px 4px; }
     .place { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: var(--emerald); }
+    .city-select {
+      background: transparent; border: 0; color: inherit; font: inherit; font-weight: 700;
+      padding: 0; outline: none; min-width: 92px;
+    }
+    .city-select option { color: var(--ink); }
     .icons { display: flex; gap: 8px; }
     .title { font-size: 15px; font-weight: 700; }
     .icon-btn {
@@ -40,6 +50,7 @@ import { IconComponent } from '../icon/icon.component';
 })
 export class HeaderBarComponent {
   private readonly location = inject(Location);
+  protected readonly user = inject(UserService);
 
   mode = input<'home' | 'page'>('page');
   city = input('');
@@ -53,5 +64,12 @@ export class HeaderBarComponent {
   protected goBack(): void {
     this.back.emit();
     this.location.back();
+  }
+
+  protected onCityChange(event: Event): void {
+    const select = event.target as HTMLSelectElement | null;
+    if (select?.value) {
+      this.user.selectCity(select.value);
+    }
   }
 }
