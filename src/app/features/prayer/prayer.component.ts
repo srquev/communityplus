@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { PrayerService } from '../../core/services/prayer.service';
 import { UserService } from '../../core/services/user.service';
 import { AppButtonComponent } from '../../shared/components/app-button.component';
@@ -18,12 +18,22 @@ const PRAYER_ICONS: Record<string, string> = {
   template: `
     <app-header-bar mode="page" title="Prayer & Islamic" actionIcon="calendar" (actionClick)="toggleCalendarSheet()" />
     <div class="city-picker-card">
-      <label class="city-picker-label" for="city-select">City</label>
-      <select id="city-select" class="city-picker" [value]="user.selectedCityId()" (change)="user.selectCity($any($event.target).value)">
-        @for (city of user.cities(); track city.id) {
-          <option [value]="city.id">{{ city.name }}</option>
-        }
-      </select>
+      <div class="picker-group">
+        <label class="city-picker-label" for="city-select">City</label>
+        <select id="city-select" class="city-picker" [value]="user.selectedCityId()" (change)="user.selectCity($any($event.target).value)">
+          @for (city of user.cities(); track city.id) {
+            <option [value]="city.id">{{ city.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="picker-group">
+        <label class="city-picker-label" for="masjid-select">Masjid</label>
+        <select id="masjid-select" class="city-picker" [value]="user.selectedMasjidId() ?? ''" (change)="user.selectMasjid($any($event.target).value)">
+          @for (masjid of prayer.selectedSchedule().masjids; track masjid.id) {
+            <option [value]="masjid.id">{{ masjid.name }}</option>
+          }
+        </select>
+      </div>
     </div>
     <div class="live-card">
       <div>
@@ -81,9 +91,9 @@ const PRAYER_ICONS: Record<string, string> = {
           }
         </div>
 
-        <app-section-header title="Masjids in {{ prayer.selectedSchedule().name }}" />
+        <app-section-header title="Selected masjid" />
         <div class="masjid-list">
-          @for (masjid of prayer.selectedSchedule().masjids; track masjid.id) {
+          @if (selectedMasjid(); as masjid) {
             <div class="masjid-card">
               <div class="masjid-header">
                 <div class="title-sm">{{ masjid.name }}</div>
@@ -154,13 +164,18 @@ const PRAYER_ICONS: Record<string, string> = {
   `,
   styles: [`
     .city-picker-card {
-      display: flex; align-items: center; justify-content: space-between; gap: 10px;
-      margin: 10px 18px 8px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r-md);
-      background: var(--card); box-shadow: 0 10px 24px rgba(18, 21, 28, 0.04);
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;
+      margin: 10px 18px 8px; padding: 8px; border: 1px solid var(--line); border-radius: var(--r-md);
+      background: linear-gradient(135deg, var(--card), var(--cloud)); box-shadow: 0 10px 24px rgba(18, 21, 28, 0.04);
     }
-    .city-picker-label { font-size: 12px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .04em; }
+    .picker-group {
+      display: flex; flex-direction: column; gap: 4px; min-width: 0; padding: 8px 10px;
+      border-radius: 12px; background: rgba(255,255,255,0.72);
+    }
+    .city-picker-label { font-size: 10px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .06em; }
     .city-picker {
       flex: 1; border: 0; background: transparent; color: var(--ink); font: inherit; font-weight: 700; outline: none;
+      width: 100%; min-width: 0;
     }
     .live-card {
       display: flex; justify-content: space-between; align-items: center; gap: 12px;
@@ -238,6 +253,11 @@ export class PrayerComponent {
   protected readonly activeMapMasjid = signal<string | null>(null);
   protected readonly showCalendarSheet = signal(false);
   protected readonly now = signal(new Date());
+  protected readonly selectedMasjid = computed(() => {
+    const schedule = this.prayer.selectedSchedule();
+    const selectedId = this.user.selectedMasjidId();
+    return schedule.masjids.find((masjid) => masjid.id === selectedId) ?? schedule.masjids[0];
+  });
 
   constructor() {
     setInterval(() => this.now.set(new Date()), 1000);

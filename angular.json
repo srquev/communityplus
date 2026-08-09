@@ -17,14 +17,23 @@
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
-            "assets": [],
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public"
+              }
+            ],
             "styles": ["src/styles/styles.scss"],
             "scripts": []
           },
           "configurations": {
             "production": {
               "budgets": [
-                { "type": "initial", "maximumWarning": "500kb", "maximumError": "1mb" }
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kb",
+                  "maximumError": "1mb"
+                }
               ],
               "outputHashing": "all"
             },
@@ -38,8 +47,12 @@
         "serve": {
           "builder": "@angular/build:dev-server",
           "configurations": {
-            "production": { "buildTarget": "city-community-app:build:production" },
-            "development": { "buildTarget": "city-community-app:build:development" }
+            "production": {
+              "buildTarget": "city-community-app:build:production"
+            },
+            "development": {
+              "buildTarget": "city-community-app:build:development"
+            }
           },
           "defaultConfiguration": "development"
         }

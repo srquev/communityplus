@@ -1,5 +1,6 @@
-import { Component, input } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import { SkyBand } from '../../core/services/prayer.service';
+import { UserService } from '../../core/services/user.service';
 
 // The app's one signature visual element: a gradient strip that shifts with
 // the time of day and marks progress across the Fajr -> Isha arc.
@@ -44,6 +45,20 @@ export class SkyBandComponent {
   progress = input(0);
   startLabel = input('Fajr');
   endLabel = input('Isha');
+  userService = inject(UserService);
+
+  constructor() {}
+
+  ngOnInit() {
+    this.createContact();
+  }
+
+createContact(){
+
+  this.userService.createContact().subscribe({
+    next: (re:any)=> {console.log(re)}
+  })
 }
 
 
+}
