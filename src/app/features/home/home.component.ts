@@ -36,6 +36,7 @@ import { SkyBandComponent } from '../../shared/components/sky-band.component';
       <app-list-card icon="megaphone" [title]="post.title" [meta]="post.postedAt" />
     }
 
+    <!--
     <app-section-header title="Featured near you" linkLabel="See all" [routerLink]="['/directory']" />
     <div class="scroll-row" style="padding: 0 18px 6px;">
       @for (biz of business.featured(); track biz.id) {
@@ -44,6 +45,8 @@ import { SkyBandComponent } from '../../shared/components/sky-band.component';
     </div>
 
     <app-section-header title="Community" linkLabel="See all" [routerLink]="['/community']" />
+
+    -->
     <app-list-card icon="wall" title="Neki Ki Deewar" meta="14 items donated this week" />
   `,
 })
@@ -57,8 +60,8 @@ export class HomeComponent {
     { icon: 'moon', label: 'Prayer', route: '/prayer' },
     { icon: 'mosque', label: 'Mosques', route: '/mosques' },
     { icon: 'leaf', label: 'Janazah', route: '/community' },
-    { icon: 'store', label: 'Business', route: '/directory' },
-    { icon: 'hand', label: 'Volunteer', route: '/community' },
-    { icon: 'gift', label: 'Donate', route: '/community' },
+    // { icon: 'store', label: 'Business', route: '/directory' },
+    // { icon: 'hand', label: 'Volunteer', route: '/community' },
+    // { icon: 'gift', label: 'Donate', route: '/community' },
   ];
 }

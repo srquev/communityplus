@@ -35,9 +35,11 @@ interface NavItem {
 export class BottomNavComponent {
   readonly items: NavItem[] = [
     { path: '/home', icon: 'home', label: 'Home' },
-    { path: '/directory', icon: 'compass', label: 'Directory' },
+    // { path: '/directory', icon: 'compass', label: 'Directory' },
     { path: '/prayer', icon: 'moon', label: 'Prayer' },
-    { path: '/community', icon: 'chat', label: 'Community' },
+    // { path: '/community', icon: 'chat', label: 'Community' },
+    { path: '/quiz', icon: 'quiz', label: 'Quiz' },
+    { path: '/hod', icon: 'quote', label: 'HOD' },
     { path: '/profile', icon: 'user', label: 'Profile' },
   ];
 }

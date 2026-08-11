@@ -42,4 +42,9 @@ export const ICONS: Record<string, string> = {
   logout: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>',
   plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>',
   check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12l6 6L20 6"/></svg>',
+  // quiz: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 015 .5c0 1.25-.75 1.85-1.5 2.35-.6.4-1 .75-1 1.65"/><path d="M12 17h.01"/></svg>',
+  quiz: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9" stroke-linecap="butt"/><path d="M9.1 9a3 3 0 015.8 1c0 2-3 2.5-3 4.5"/><path d="M12 17.5h.01"/></svg>',
+  // quote: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>',
+  // quote: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 8c-1.7 0-3 1.3-3 3v2c0 1.7 1.3 3 3 3h1v-3H7v-2c0-.6.4-1 1-1V8H7zM17 8c-1.7 0-3 1.3-3 3v2c0 1.7 1.3 3 3 3h1v-3h-1v-2c0-.6.4-1 1-1V8h-1z"/></svg>'
+  quote: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/><path d="M9.5 7.5c1-1 2-1 2.5 0s1.5 1 2.5 0" stroke-width="1.3" stroke-linecap="round"/><path d="M9.5 11.5c1.2-.8 2.3.8 3.2 0 .6-.5 1.3-.3 1.8.2" stroke-width="1.3" stroke-linecap="round"/></svg>'
 };

@@ -15,7 +15,7 @@ import { IconComponent } from '../icon/icon.component';
           <span class="brand-text">Community+</span>
         </div>
         <div class="icons">
-          <button type="button" class="icon-btn" (click)="searchClick.emit()"><app-icon name="search" [size]="16" /></button>
+          <!-- <button type="button" class="icon-btn" (click)="searchClick.emit()"><app-icon name="search" [size]="16" /></button> -->
           <button type="button" class="icon-btn" (click)="bellClick.emit()"><app-icon name="bell" [size]="16" /></button>
         </div>
       </div>
@@ -53,18 +53,26 @@ import { IconComponent } from '../icon/icon.component';
     .place { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: var(--emerald); }
     .brand-text { font-size: 14px; font-weight: 800; color: var(--ink); }
     .location-card {
-      display: flex; align-items: center; gap: 8px; margin: 0 18px 10px; padding: 8px;
-      border: 1px solid var(--line); border-radius: 16px; background: linear-gradient(135deg, var(--card), var(--cloud));
-      box-shadow: 0 10px 20px rgba(18, 21, 28, 0.04);
+      display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 18px 10px;
+    padding: 0 8px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--card), var(--cloud));
+    box-shadow: 0 10px 20px rgba(18, 21, 28, 0.04);
+    font-size: 12px;
     }
     .select-pill {
       flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 6px 8px;
       border-radius: 12px; background: rgba(255,255,255,0.72);
     }
-    .select-label { font-size: 10px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .06em; }
+    .select-label { font-size: 10px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .06em; padding-left: 4px;}
     .city-select {
       background: transparent; border: 0; color: var(--ink); font: inherit; font-weight: 700;
       padding: 0; outline: none; min-width: 0; width: 100%;
+      
     }
     .city-select option { color: var(--ink); }
     .divider { width: 1px; align-self: stretch; background: var(--line); }
