@@ -60,6 +60,8 @@ export class HomeComponent {
     { icon: 'moon', label: 'Prayer', route: '/prayer' },
     { icon: 'mosque', label: 'Mosques', route: '/mosques' },
     { icon: 'leaf', label: 'Janazah', route: '/community' },
+    { icon: 'quiz', label: 'Quiz', route: '/quiz' },
+    { icon: 'quote', label: 'Hadith', route: '/quiz' },
     // { icon: 'store', label: 'Business', route: '/directory' },
     // { icon: 'hand', label: 'Volunteer', route: '/community' },
     // { icon: 'gift', label: 'Donate', route: '/community' },
