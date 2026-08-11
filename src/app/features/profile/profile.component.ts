@@ -24,7 +24,7 @@ import { IconComponent } from '../../shared/icon/icon.component';
     <div class="card stats-card">
       <div class="stat"><div class="title-sm">{{ user.profile().streak }}</div><div class="meta">day streak</div></div>
       <div class="rule"></div>
-      <div class="stat"><div class="title-sm">₹{{ user.profile().donatedTotal }}</div><div class="meta">donated</div></div>
+      <div class="stat"><div class="title-sm">{{ user.profile().donatedTotal }}</div><div class="meta">questions</div></div>
       <div class="rule"></div>
       <div class="stat"><div class="title-sm">{{ user.profile().badgeCount }}</div><div class="meta">badges</div></div>
     </div>
@@ -33,6 +33,8 @@ import { IconComponent } from '../../shared/icon/icon.component';
     <app-list-card icon="bell" title="Notifications">
       <app-icon trailing name="chevron" [size]="18" />
     </app-list-card>
+
+    <!--
     <a [routerLink]="['/onboarding']" style="text-decoration:none">
       <app-list-card icon="pin" title="City & language">
         <app-icon trailing name="chevron" [size]="18" />
@@ -46,6 +48,8 @@ import { IconComponent } from '../../shared/icon/icon.component';
     <app-list-card icon="gift" title="Donation history">
       <app-icon trailing name="chevron" [size]="18" />
     </app-list-card>
+
+    -->
     <app-list-card icon="shield" title="Privacy & security">
       <app-icon trailing name="chevron" [size]="18" />
     </app-list-card>
