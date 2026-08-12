@@ -8,6 +8,7 @@ export const ICONS: Record<string, string> = {
   sunrise: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 19h18M6 15a6 6 0 0112 0M12 3v3M4.5 7.5l2.1 2.1M19.5 7.5l-2.1 2.1"/><path d="M12 11v5M9.5 13.5l2.5 2.5 2.5-2.5"/></svg>',
   afternoon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 19h18M6 16a6 6 0 0112 0M12 4v3M5 8l2 2M19 8l-2 2"/><path d="M15 4l3 3"/></svg>',
   moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg>',
+  moonfilled: '<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg>',
   moonrise: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 19h18"/><path d="M7 19a5 5 0 0110 0"/><path d="M12 5v7M9.5 7.5L12 5l2.5 2.5"/></svg>',
   'full-moon': '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"/><circle cx="9" cy="9" r="1.25" fill="rgba(255,255,255,.35)"/><circle cx="15.5" cy="14" r="1.6" fill="rgba(255,255,255,.35)"/><circle cx="10" cy="16" r=".9" fill="rgba(255,255,255,.35)"/></svg>',
   mosque: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M4 21v-7l3-3 2 2 3-3 3 3 2-2 3 3v7M12 3l1.5 2h-3z"/><circle cx="12" cy="7" r="1.4"/></svg>',
