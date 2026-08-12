@@ -19,7 +19,7 @@ export const routes: Routes = [
       // { path: 'directory/:id', loadComponent: () => import('./features/directory/business-detail.component').then((m) => m.BusinessDetailComponent) },
       // { path: 'community', loadComponent: () => import('./features/community/community.component').then((m) => m.CommunityComponent) },
       { path: 'quiz', loadComponent: () => import('./features/quiz/quiz.component').then((m) => m.QuizComponent) },
-      { path: 'hod', loadComponent: () => import('./features/quiz/quiz.component').then((m) => m.QuizComponent) },
+      { path: 'hod', loadComponent: () => import('./features/hadith/hadith-of-day.component').then((m) => m.HadithOfDayComponent) },
       { path: 'profile', loadComponent: () => import('./features/profile/profile.component').then((m) => m.ProfileComponent) },
     ],
   },

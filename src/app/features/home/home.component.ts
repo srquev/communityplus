@@ -23,9 +23,10 @@ import { SkyBandComponent } from '../../shared/components/sky-band.component';
 
     <app-sky-band
       [band]="prayer.skyBand()"
-      [tag]="prayer.nextPrayer().name + ' in ' + prayer.minutesToNext() + ' minutes'"
-      [time]="prayer.activePrayer().time"
-      [sub]="'Ramadan · Day ' + prayer.ramadanDay() + ' · Iftar at ' + prayer.iftar()"
+      [tag]="prayer.nextPrayer().name"
+      [time]="prayer.formatTime(prayer.nextPrayer().time)"
+      [countdown]="prayer.countdownToNext()"
+      [sub]="prayer.activePrayer().name + ' is active · Ramadan Day ' + prayer.ramadanDay()"
       [progress]="prayer.dayProgressPercent()"
     />
 
@@ -61,7 +62,7 @@ export class HomeComponent {
     { icon: 'mosque', label: 'Mosques', route: '/mosques' },
     { icon: 'leaf', label: 'Janazah', route: '/community' },
     { icon: 'quiz', label: 'Quiz', route: '/quiz' },
-    { icon: 'quote', label: 'Hadith', route: '/quiz' },
+    { icon: 'quote', label: 'Hadith', route: '/hod' },
     // { icon: 'store', label: 'Business', route: '/directory' },
     // { icon: 'hand', label: 'Volunteer', route: '/community' },
     // { icon: 'gift', label: 'Donate', route: '/community' },

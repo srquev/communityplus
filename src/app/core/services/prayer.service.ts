@@ -44,14 +44,17 @@ export class PrayerService {
   private readonly schedules = signal<CityPrayerSchedule[]>(CITY_PRAYER_DATA);
   private readonly liveMonth = signal<string>('');
   private readonly liveTimings = signal<PrayerTiming[] | null>(null);
-  private readonly calendarDays = signal<Array<{ date: string; day: string; month: string; year: string; isCurrentMonth: boolean }>>([]);
-  private readonly nowMinutes = signal<number>(this.currentMinutes());
+  private readonly calendarDays = signal<Array<{ date: string; englishDay: string; day: string; month: string; monthNumber: number; year: string; isToday: boolean }>>([]);
+  private readonly calendarMonthValue = signal(this.startOfMonth(new Date()));
+  private readonly now = signal(new Date());
 
   constructor() {
+    setInterval(() => this.now.set(new Date()), 1000);
     effect(() => {
       this.user.selectedCityId();
       this.refreshForSelectedCity();
     });
+    effect(() => this.refreshCalendar(this.calendarMonthValue()));
   }
 
   readonly day = computed<PrayerDay>(() => {
@@ -73,27 +76,39 @@ export class PrayerService {
   readonly iftar = computed(() => this.day().iftar);
   readonly selectedSchedule = computed(() => this.schedules().find((item) => item.id === this.user.selectedCityId()) ?? this.schedules()[0]);
   readonly calendar = computed(() => this.calendarDays());
+  readonly calendarMonth = computed(() => this.calendarMonthValue());
+
+  changeCalendarMonth(offset: number): void {
+    const month = this.calendarMonthValue();
+    this.calendarMonthValue.set(new Date(month.getFullYear(), month.getMonth() + offset, 1));
+  }
+
+  resetCalendarMonth(): void {
+    this.calendarMonthValue.set(this.startOfMonth(new Date()));
+  }
 
   readonly nextPrayer = computed<PrayerTiming>(() => {
-    const now = this.nowMinutes();
-    const upcoming = this.day().timings.find((t) => toMinutes(t.time) > now);
+    const now = this.currentSeconds();
+    const upcoming = this.day().timings.find((t) => toMinutes(t.time) * 60 > now);
     return upcoming ?? this.day().timings[0];
   });
 
   readonly activePrayer = computed<PrayerTiming>(() => {
-    const now = this.nowMinutes();
+    const now = this.currentSeconds();
     const timings = this.day().timings;
     let active = timings[0];
     for (const t of timings) {
-      if (toMinutes(t.time) <= now) active = t;
+      if (toMinutes(t.time) * 60 <= now) active = t;
     }
     return active;
   });
 
-  readonly minutesToNext = computed(() => {
-    const diff = toMinutes(this.nextPrayer().time) - this.nowMinutes();
-    return diff >= 0 ? diff : diff + 24 * 60;
+  readonly secondsToNext = computed(() => {
+    const diff = toMinutes(this.nextPrayer().time) * 60 - this.currentSeconds();
+    return diff >= 0 ? diff : diff + 24 * 60 * 60;
   });
+
+  readonly countdownToNext = computed(() => this.formatCountdown(this.secondsToNext()));
 
   readonly skyBand = computed<SkyBand>(() => {
     switch (this.activePrayer().name) {
@@ -109,7 +124,7 @@ export class PrayerService {
     const timings = this.day().timings;
     const start = toMinutes(timings[0].time);
     const end = toMinutes(timings[timings.length - 1].time);
-    const now = this.nowMinutes();
+    const now = this.currentSeconds() / 60;
     if (now <= start) return 0;
     if (now >= end) return 100;
     return Math.round(((now - start) / (end - start)) * 100);
@@ -151,20 +166,32 @@ export class PrayerService {
         this.liveTimings.set(null);
       }
     });
-    const calendarUrl = `https://api.aladhan.com/v1/gToHCalendar/8/2026`;
+  }
+
+  private refreshCalendar(monthDate: Date): void {
+    const today = new Date();
+    const calendarUrl = `https://api.aladhan.com/v1/gToHCalendar/${monthDate.getMonth() + 1}/${monthDate.getFullYear()}`;
     this.http.get<AladhanCalendarResponse>(calendarUrl).pipe(
       map((response) => {
         const data = response?.data ?? [];
-        return data.map((item) => ({
-          date: item.gregorian?.date ?? '',
-          day: item.hijri?.day ?? '',
-          month: item.hijri?.month?.en ?? 'Islamic month',
-          year: item.hijri?.year ?? '',
-          isCurrentMonth: (item.hijri?.month?.number ?? 0) === 2,
-        }));
+        return data.map((item) => {
+          const date = item.gregorian?.date ?? '';
+          const [day, month, year] = date.split('-').map(Number);
+          const isToday = day === today.getDate() && month === today.getMonth() + 1 && year === today.getFullYear();
+          return {
+            date,
+            englishDay: String(day || ''),
+            day: item.hijri?.day ?? '',
+            month: item.hijri?.month?.en ?? 'Islamic month',
+            monthNumber: item.hijri?.month?.number ?? 0,
+            year: item.hijri?.year ?? '',
+            isToday,
+          };
+        });
       }),
       catchError(() => of([])),
-    ).subscribe((days) => this.calendarDays.set(days));  }
+    ).subscribe((days) => this.calendarDays.set(days));
+  }
 
   private mapApiTimings(timings: Record<string, string>): PrayerTiming[] {
     return [
@@ -198,8 +225,19 @@ export class PrayerService {
     }
   }
 
-  private currentMinutes(): number {
-    const now = new Date();
-    return now.getHours() * 60 + now.getMinutes();
+  private currentSeconds(): number {
+    const now = this.now();
+    return now.getHours() * 60 * 60 + now.getMinutes() * 60 + now.getSeconds();
+  }
+
+  private startOfMonth(date: Date): Date {
+    return new Date(date.getFullYear(), date.getMonth(), 1);
+  }
+
+  private formatCountdown(totalSeconds: number): string {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return [hours, minutes, seconds].map((value) => String(value).padStart(2, '0')).join(':');
   }
 }
