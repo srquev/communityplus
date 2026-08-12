@@ -17,15 +17,22 @@ import { BottomNavComponent } from '../shared/components/bottom-nav.component';
   `,
   styles: [`
     .app-shell {
-      max-width: var(--max-app-width);
-      margin: 0 auto;
-      height: 100dvh;
-      display: flex;
-      flex-direction: column;
-      background: var(--cloud);
-      box-shadow: 0 0 40px rgba(0,0,0,.08);
+      // max-width: var(--max-app-width);
+      // margin: 0 auto;
+      // height: 100dvh;
+      // display: flex;
+      // flex-direction: column;
+      // background: var(--cloud);
+      // box-shadow: 0 0 40px rgba(0,0,0,.08);
+      ax-width: var(--max-app-width);
+    margin: 0 auto;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    background: var(--cloud);
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.08);
     }
     .app-content { flex: 1; overflow-y: auto; }
   `],
 })
-export class ShellComponent {}
+export class ShellComponent { }
