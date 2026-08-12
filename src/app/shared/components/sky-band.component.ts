@@ -14,8 +14,9 @@ import { SkyBand } from '../../core/services/prayer.service';
         </div>
         <div class="next-label">Next prayer · {{ tag() }} at {{ time() }}</div>
         <div class="countdown" aria-live="polite">{{ countdown() }}</div>
-        <div class="countdown-label">remaining</div>
-        <div class="sub">{{ sub() }}</div>
+         <!-- 
+      <div class="countdown-label">remaining</div>
+       <div class="sub">{{ sub() }}</div> -->
       </div>
       <div class="arc-track">
         <div class="arc-fill" [style.width.%]="progress()"></div>

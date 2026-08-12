@@ -1,36 +1,41 @@
-import { Injectable, computed, effect, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { catchError, map, of } from 'rxjs';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { CITY_PRAYER_DATA } from '../data/mock-data';
 import { CityPrayerSchedule, PrayerDay, PrayerTiming } from '../models';
 import { UserService } from './user.service';
 
 export type SkyBand = 'fajr' | 'zuhr' | 'asr' | 'maghrib' | 'isha';
 
-interface AladhanResponse {
-  data?: {
-    timings?: Record<string, string>;
-    date?: {
-      hijri?: {
-        day?: number;
-        month?: { en?: string };
-        year?: number;
-      };
-    };
-  };
+interface CalendarDay {
+  date: string;
+  englishDay: string;
+  day: string;
+  month: string;
+  monthNumber: number;
+  year: string;
+  isToday: boolean;
 }
 
-interface AladhanCalendarResponse {
-  code?: number;
-  data?: Array<{
-    gregorian?: { date?: string };
-    hijri?: {
-      day?: string;
-      month?: { number?: number; en?: string; ar?: string };
-      year?: string;
-    };
-  }>;
+interface HijriDate {
+  day: number;
+  month: number;
+  year: number;
 }
+
+const HIJRI_MONTHS = [
+  '',
+  'Muharram',
+  'Safar',
+  'Rabi al-awwal',
+  'Rabi al-thani',
+  'Jumada al-awwal',
+  'Jumada al-thani',
+  'Rajab',
+  'Shaaban',
+  'Ramadan',
+  'Shawwal',
+  'Dhu al-Qadah',
+  'Dhu al-Hijjah',
+];
 
 function toMinutes(time: string): number {
   const [h, m] = time.split(':').map(Number);
@@ -39,33 +44,24 @@ function toMinutes(time: string): number {
 
 @Injectable({ providedIn: 'root' })
 export class PrayerService {
-  private readonly http = inject(HttpClient);
   private readonly user = inject(UserService);
   private readonly schedules = signal<CityPrayerSchedule[]>(CITY_PRAYER_DATA);
-  private readonly liveMonth = signal<string>('');
-  private readonly liveTimings = signal<PrayerTiming[] | null>(null);
-  private readonly calendarDays = signal<Array<{ date: string; englishDay: string; day: string; month: string; monthNumber: number; year: string; isToday: boolean }>>([]);
   private readonly calendarMonthValue = signal(this.startOfMonth(new Date()));
   private readonly now = signal(new Date());
 
   constructor() {
     setInterval(() => this.now.set(new Date()), 1000);
-    effect(() => {
-      this.user.selectedCityId();
-      this.refreshForSelectedCity();
-    });
-    effect(() => this.refreshCalendar(this.calendarMonthValue()));
   }
 
   readonly day = computed<PrayerDay>(() => {
     const selectedCity = this.user.selectedCityId();
     const schedule = this.schedules().find((item) => item.id === selectedCity) ?? this.schedules()[0];
     return {
-      hijriDate: this.liveMonth() || schedule.hijriDate,
+      hijriDate: schedule.hijriDate,
       ramadanDay: schedule.ramadanDay,
       sehriEnd: schedule.sehriEnd,
       iftar: schedule.iftar,
-      timings: this.liveTimings() ?? schedule.timings,
+      timings: schedule.timings,
     };
   });
 
@@ -75,7 +71,7 @@ export class PrayerService {
   readonly sehriEnd = computed(() => this.day().sehriEnd);
   readonly iftar = computed(() => this.day().iftar);
   readonly selectedSchedule = computed(() => this.schedules().find((item) => item.id === this.user.selectedCityId()) ?? this.schedules()[0]);
-  readonly calendar = computed(() => this.calendarDays());
+  readonly calendar = computed(() => this.buildCalendar(this.calendarMonthValue()));
   readonly calendarMonth = computed(() => this.calendarMonthValue());
 
   changeCalendarMonth(offset: number): void {
@@ -141,88 +137,61 @@ export class PrayerService {
     return `https://www.openstreetmap.org/search?query=${encodeURIComponent(address)}`;
   }
 
-  private refreshForSelectedCity(): void {
-    const selectedCity = this.selectedSchedule();
-    const cityName = this.cityApiName(selectedCity.id);
-    const url = `https://api.aladhan.com/v1/timingsByCity?city=${encodeURIComponent(cityName)}&country=India&method=4`;
+  private buildCalendar(monthDate: Date): CalendarDay[] {
+    const today = new Date();
+    const year = monthDate.getFullYear();
+    const month = monthDate.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    this.http.get<AladhanResponse>(url).pipe(
-      map((response) => {
-        const timings = response?.data?.timings;
-        const hijri = response?.data?.date?.hijri;
-        if (!timings || !hijri) return null;
+    return Array.from({ length: daysInMonth }, (_, index) => {
+      const englishDay = index + 1;
+      const date = new Date(year, month, englishDay);
+      const hijri = this.toHijri(date);
+      const isToday = englishDay === today.getDate() && month === today.getMonth() && year === today.getFullYear();
 
-        const mapped = this.mapApiTimings(timings);
-        const month = [hijri.day, hijri.month?.en, hijri.year].filter(Boolean).join(' ');
-        return { month, timings: mapped };
-      }),
-      catchError(() => of(null)),
-    ).subscribe((result) => {
-      if (result) {
-        this.liveMonth.set(result.month);
-        this.liveTimings.set(result.timings);
-      } else {
-        this.liveMonth.set('');
-        this.liveTimings.set(null);
-      }
+      return {
+        date: `${String(englishDay).padStart(2, '0')}-${String(month + 1).padStart(2, '0')}-${year}`,
+        englishDay: String(englishDay),
+        day: String(hijri.day),
+        month: HIJRI_MONTHS[hijri.month] ?? 'Islamic month',
+        monthNumber: hijri.month,
+        year: String(hijri.year),
+        isToday,
+      };
     });
   }
 
-  private refreshCalendar(monthDate: Date): void {
-    const today = new Date();
-    const calendarUrl = `https://api.aladhan.com/v1/gToHCalendar/${monthDate.getMonth() + 1}/${monthDate.getFullYear()}`;
-    this.http.get<AladhanCalendarResponse>(calendarUrl).pipe(
-      map((response) => {
-        const data = response?.data ?? [];
-        return data.map((item) => {
-          const date = item.gregorian?.date ?? '';
-          const [day, month, year] = date.split('-').map(Number);
-          const isToday = day === today.getDate() && month === today.getMonth() + 1 && year === today.getFullYear();
-          return {
-            date,
-            englishDay: String(day || ''),
-            day: item.hijri?.day ?? '',
-            month: item.hijri?.month?.en ?? 'Islamic month',
-            monthNumber: item.hijri?.month?.number ?? 0,
-            year: item.hijri?.year ?? '',
-            isToday,
-          };
-        });
-      }),
-      catchError(() => of([])),
-    ).subscribe((days) => this.calendarDays.set(days));
+  private toHijri(date: Date): HijriDate {
+    const jd = this.toJulianDay(date);
+    let l = jd - 1948440 + 10632;
+    const n = Math.floor((l - 1) / 10631);
+    l = l - 10631 * n + 354;
+    const j = Math.floor((10985 - l) / 5316) * Math.floor((50 * l) / 17719)
+      + Math.floor(l / 5670) * Math.floor((43 * l) / 15238);
+    l = l - Math.floor((30 - j) / 15) * Math.floor((17719 * j) / 50)
+      - Math.floor(j / 16) * Math.floor((15238 * j) / 43) + 29;
+    const month = Math.floor((24 * l) / 709);
+    const day = l - Math.floor((709 * month) / 24);
+    const year = 30 * n + j - 30;
+
+    return { day, month, year };
   }
 
-  private mapApiTimings(timings: Record<string, string>): PrayerTiming[] {
-    return [
-      { name: 'Fajr', time: this.normalizeApiTime(timings['Fajr']) },
-      { name: 'Zuhr', time: this.normalizeApiTime(timings['Dhuhr']) },
-      { name: 'Asr', time: this.normalizeApiTime(timings['Asr']) },
-      { name: 'Maghrib', time: this.normalizeApiTime(timings['Maghrib']) },
-      { name: 'Isha', time: this.normalizeApiTime(timings['Isha']) },
-    ];
-  }
+  private toJulianDay(date: Date): number {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const a = Math.floor((14 - month) / 12);
+    const adjustedYear = year + 4800 - a;
+    const adjustedMonth = month + 12 * a - 3;
 
-  private normalizeApiTime(value?: string): string {
-    if (!value) return '00:00';
-    return value.replace(/\s/g, '').split('(')[0].split(' ')[0];
-  }
-
-  private cityApiName(id: string): string {
-    switch (id) {
-      case 'mau': return 'Mau';
-      case 'lucknow': return 'Lucknow';
-      case 'kanpur': return 'Kanpur';
-      case 'agra': return 'Agra';
-      case 'varanasi': return 'Varanasi';
-      case 'prayagraj': return 'Prayagraj';
-      case 'meerut': return 'Meerut';
-      case 'bareilly': return 'Bareilly';
-      case 'aligarh': return 'Aligarh';
-      case 'moradabad': return 'Moradabad';
-      case 'gorakhpur': return 'Gorakhpur';
-      default: return 'Lucknow';
-    }
+    return day
+      + Math.floor((153 * adjustedMonth + 2) / 5)
+      + 365 * adjustedYear
+      + Math.floor(adjustedYear / 4)
+      - Math.floor(adjustedYear / 100)
+      + Math.floor(adjustedYear / 400)
+      - 32045;
   }
 
   private currentSeconds(): number {
