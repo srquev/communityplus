@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, ElementRef, ViewChild, computed, signal } from '@angular/core';
 import { HeaderBarComponent } from '../../shared/components/header-bar.component';
 import { IconComponent } from '../../shared/icon/icon.component';
 
@@ -42,7 +42,7 @@ const HADITH_ENTRIES: HadithEntry[] = [
         <p>A short Hadith, selected for today.</p>
       </div>
 
-      <article class="hadith-card">
+      <article #shareCard class="hadith-card">
         <div class="card-topline">
           <span class="topic">{{ selectedHadith().topic }}</span>
           <time>{{ displayDate(selectedHadith().daysAgo) }}</time>
@@ -56,6 +56,16 @@ const HADITH_ENTRIES: HadithEntry[] = [
           <strong>{{ selectedHadith().reference }}</strong>
         </footer>
       </article>
+
+      <div class="share-row">
+        <button type="button" class="share-card-btn" [disabled]="isSharing()" (click)="shareHadith()">
+          <app-icon name="share" [size]="16" />
+          <span>{{ isSharing() ? 'Preparing image...' : 'Share as image' }}</span>
+        </button>
+        @if (shareMessage()) {
+          <span class="share-message">{{ shareMessage() }}</span>
+        }
+      </div>
 
       <section class="archive" aria-labelledby="previous-hadith-title">
         <div class="section-heading">
@@ -93,6 +103,10 @@ const HADITH_ENTRIES: HadithEntry[] = [
     .narrator { position: relative; z-index: 1; margin: 16px 0 14px; color: var(--ink-soft); font-size: 12px; font-style: italic; }
     .reference { position: relative; z-index: 1; display: flex; align-items: center; gap: 6px; padding-top: 12px; border-top: 1px solid rgba(31, 123, 83, .16); color: var(--emerald-ink); font-size: 11px; }
     .reference strong { margin-left: auto; font-size: 11px; }
+    .share-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+    .share-card-btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 38px; padding: 0 13px; border: 1px solid var(--emerald); border-radius: 12px; background: var(--emerald); color: #fff; font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
+    .share-card-btn:disabled { cursor: progress; opacity: .68; }
+    .share-message { color: var(--ink-soft); font-size: 11px; font-weight: 650; }
     .archive { margin-top: 24px; }
     .section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
     h2 { margin: 0 0 3px; color: var(--ink); font-size: 15px; font-weight: 750; }
@@ -109,12 +123,46 @@ const HADITH_ENTRIES: HadithEntry[] = [
   `],
 })
 export class HadithOfDayComponent {
+  @ViewChild('shareCard') private shareCard?: ElementRef<HTMLElement>;
+
   protected readonly entries = HADITH_ENTRIES;
   protected readonly selectedId = signal(HADITH_ENTRIES[0].id);
   protected readonly selectedHadith = computed(() => HADITH_ENTRIES.find((entry) => entry.id === this.selectedId()) ?? HADITH_ENTRIES[0]);
+  protected readonly isSharing = signal(false);
+  protected readonly shareMessage = signal('');
 
   protected selectHadith(id: string): void {
     this.selectedId.set(id);
+  }
+
+  protected async shareHadith(): Promise<void> {
+    const element = this.shareCard?.nativeElement;
+    if (!element) return;
+
+    this.isSharing.set(true);
+    this.shareMessage.set('');
+
+    try {
+      const blob = await this.captureElement(element);
+      const file = new File([blob], 'hadith-of-the-day.png', { type: 'image/png' });
+      const shareData: ShareData = {
+        title: 'Hadith of the Day',
+        text: `${this.selectedHadith().text} - ${this.selectedHadith().reference}`,
+        files: [file],
+      };
+
+      if (navigator.canShare?.(shareData)) {
+        await navigator.share(shareData);
+        this.shareMessage.set('Ready for WhatsApp or Instagram.');
+      } else {
+        this.downloadBlob(blob);
+        this.shareMessage.set('Image downloaded.');
+      }
+    } catch {
+      this.shareMessage.set('Could not create the image.');
+    } finally {
+      this.isSharing.set(false);
+    }
   }
 
   protected displayDate(daysAgo: number): string {
@@ -130,5 +178,76 @@ export class HadithOfDayComponent {
     const date = new Date();
     date.setDate(date.getDate() - daysAgo);
     return date;
+  }
+
+  private async captureElement(element: HTMLElement): Promise<Blob> {
+    await document.fonts?.ready;
+
+    const rect = element.getBoundingClientRect();
+    const width = Math.ceil(rect.width);
+    const height = Math.ceil(rect.height);
+    const clone = element.cloneNode(true) as HTMLElement;
+
+    this.inlineStyles(element, clone);
+    clone.style.width = `${width}px`;
+    clone.style.height = `${height}px`;
+    clone.style.margin = '0';
+
+    const serialized = new XMLSerializer().serializeToString(clone);
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+        <foreignObject width="100%" height="100%">
+          <div xmlns="http://www.w3.org/1999/xhtml">${serialized}</div>
+        </foreignObject>
+      </svg>
+    `;
+    const image = await this.loadImage(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`);
+    const scale = Math.min(window.devicePixelRatio || 2, 3);
+    const canvas = document.createElement('canvas');
+    canvas.width = width * scale;
+    canvas.height = height * scale;
+
+    const context = canvas.getContext('2d');
+    if (!context) throw new Error('Canvas is not supported.');
+
+    context.scale(scale, scale);
+    context.drawImage(image, 0, 0, width, height);
+
+    return await new Promise((resolve, reject) => {
+      canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('Image export failed.')), 'image/png');
+    });
+  }
+
+  private inlineStyles(source: Element, target: Element): void {
+    if (source instanceof HTMLElement && target instanceof HTMLElement) {
+      const style = window.getComputedStyle(source);
+      for (let index = 0; index < style.length; index += 1) {
+        const property = style.item(index);
+        target.style.setProperty(property, style.getPropertyValue(property), style.getPropertyPriority(property));
+      }
+    }
+
+    Array.from(source.children).forEach((child, index) => {
+      const targetChild = target.children.item(index);
+      if (targetChild) this.inlineStyles(child, targetChild);
+    });
+  }
+
+  private loadImage(src: string): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => resolve(image);
+      image.onerror = () => reject(new Error('Image load failed.'));
+      image.src = src;
+    });
+  }
+
+  private downloadBlob(blob: Blob): void {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'hadith-of-the-day.png';
+    link.click();
+    URL.revokeObjectURL(url);
   }
 }
