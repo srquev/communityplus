@@ -66,6 +66,10 @@ export class PrayerService {
   });
 
   readonly timings = computed(() => this.day().timings);
+  readonly tahajjud = computed<PrayerTiming>(() => {
+    const fajr = this.day().timings.find((timing) => timing.name === 'Fajr') ?? this.day().timings[0];
+    return { name: 'Tahajjud', time: this.subtractMinutes(fajr.time, 90) };
+  });
   readonly hijriDate = computed(() => this.day().hijriDate);
   readonly ramadanDay = computed(() => this.day().ramadanDay);
   readonly sehriEnd = computed(() => this.day().sehriEnd);
@@ -201,6 +205,13 @@ export class PrayerService {
 
   private startOfMonth(date: Date): Date {
     return new Date(date.getFullYear(), date.getMonth(), 1);
+  }
+
+  private subtractMinutes(time: string, minutes: number): string {
+    const totalMinutes = (toMinutes(time) - minutes + 24 * 60) % (24 * 60);
+    const hours = Math.floor(totalMinutes / 60);
+    const mins = totalMinutes % 60;
+    return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
   }
 
   private formatCountdown(totalSeconds: number): string {

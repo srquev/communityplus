@@ -21,7 +21,7 @@ export interface CityPrayerSchedule {
   masjids: CityScheduleMasjid[];
 }
 
-export type PrayerName = 'Fajr' | 'Zuhr' | 'Asr' | 'Maghrib' | 'Isha';
+export type PrayerName = 'Fajr' | 'Zuhr' | 'Asr' | 'Maghrib' | 'Isha' | 'Tahajjud';
 
 export interface PrayerTiming {
   name: PrayerName;

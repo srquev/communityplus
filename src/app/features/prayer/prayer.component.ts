@@ -11,8 +11,9 @@ const PRAYER_ICONS: Record<string, string> = {
   Fajr: 'sunrise',
   Zuhr: 'sun',
   Asr: 'sunset',
-  Maghrib: 'moon-stars',
-  Isha: 'full-moon-stars',
+  Maghrib: 'moon',
+  Isha: 'moonfilled',
+  Tahajjud: 'moon-stars',
 };
 
 @Component({
@@ -108,6 +109,19 @@ const PRAYER_ICONS: Record<string, string> = {
               <div class="title-sm">{{ prayer.formatTime(t.time) }}</div>
             </div>
           }
+        </div>
+
+        <app-section-header title="Tahajjud prayer" />
+        <div class="tahajjud-card">
+          <div class="tahajjud-orb">
+            <app-icon [name]="prayerIcons['Tahajjud']" [size]="22" />
+          </div>
+          <div class="tahajjud-copy">
+            <div class="tahajjud-kicker">Night prayer</div>
+            <div class="title-sm">Tahajjud</div>
+            <p>Suggested time based on your local Fajr timing.</p>
+          </div>
+          <div class="tahajjud-time">{{ prayer.formatTime(prayer.tahajjud().time) }}</div>
         </div>
 
         <app-section-header title="Selected masjid" />
@@ -261,6 +275,33 @@ const PRAYER_ICONS: Record<string, string> = {
       display: flex; align-items: center; justify-content: center;
     }
     .icon-chip.active { background: var(--emerald); color: #fff; }
+    .tahajjud-card {
+      position: relative; display: flex; align-items: center; gap: 12px;
+      margin: 0 18px 12px; padding: 14px; overflow: hidden;
+      border: 1px solid rgba(120, 101, 184, .22); border-radius: var(--r-md);
+      background: linear-gradient(135deg, #17172f, #263158 58%, #35486a);
+      color: #f7f3ff; box-shadow: 0 14px 28px rgba(23, 23, 47, .18);
+    }
+    .tahajjud-card::after {
+      position: absolute; right: -28px; top: -36px; width: 108px; height: 108px;
+      border: 18px solid rgba(255, 255, 255, .08); border-radius: 50%; content: '';
+    }
+    .tahajjud-orb {
+      position: relative; z-index: 1; display: flex; align-items: center; justify-content: center;
+      width: 46px; height: 46px; flex: 0 0 46px; border-radius: 14px;
+      background: rgba(255, 255, 255, .13); color: #ffe9a8;
+    }
+    .tahajjud-copy { position: relative; z-index: 1; flex: 1; min-width: 0; }
+    .tahajjud-kicker {
+      margin-bottom: 3px; color: rgba(255, 233, 168, .9);
+      font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+    }
+    .tahajjud-copy .title-sm { color: #fff; }
+    .tahajjud-copy p { margin: 4px 0 0; color: rgba(247, 243, 255, .72); font-size: 11px; line-height: 1.35; }
+    .tahajjud-time {
+      position: relative; z-index: 1; flex: 0 0 auto; padding: 7px 10px; border-radius: 999px;
+      background: rgba(255, 255, 255, .14); color: #fff; font-size: 13px; font-weight: 850;
+    }
     .masjid-list { padding: 0 18px 8px; display: flex; flex-direction: column; gap: 10px; }
     .masjid-card {
       background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md); padding: 12px 14px; box-shadow: 0 8px 18px rgba(18, 21, 28, 0.03);
