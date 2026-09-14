@@ -1,0 +1,129 @@
+<app-header-bar mode="page" title="Janazah" actionIcon="leaf" />
+
+<main class="janazah-page">
+  <section class="intro-card">
+    <div class="intro-icon"><app-icon name="leaf" [size]="24" /></div>
+    <div>
+      <div class="eyebrow">Community notice</div>
+      <h1>Janazah information</h1>
+      <p>Prayer timing, masjid address, qabristan details, and family notes.</p>
+    </div>
+  </section>
+
+  <section class="date-block today-block" aria-labelledby="today-title">
+    <div class="date-head">
+      <div>
+        <span>Today</span>
+        <h2 id="today-title">{{ formatDate(todayDate) }}</h2>
+      </div>
+      <div class="date-actions">
+        <strong>{{ todayNotices().length }} notice{{ todayNotices().length === 1 ? '' : 's' }}</strong>
+      </div>
+    </div>
+
+    @if (todayNotices().length) {
+      <div class="notice-stack">
+        @for (notice of todayNotices(); track notice.id) {
+          <article class="notice-card current" role="button" tabindex="0" [class.open]="isNoticeExpanded(notice.id)" [attr.aria-expanded]="isNoticeExpanded(notice.id)" (click)="toggleNotice(notice.id)" (keydown.enter)="toggleNotice(notice.id)" (keydown.space)="toggleNotice(notice.id); $event.preventDefault()">
+            <div class="notice-head">
+              <div>
+                <div class="eyebrow">{{ notice.prayerName }} · {{ notice.prayerTime }}</div>
+                <h3>{{ notice.name }}</h3>
+              </div>
+              <div class="notice-actions">
+                <span>{{ notice.postedAt }}</span>
+                <app-icon name="chevron" [size]="16" />
+              </div>
+            </div>
+
+            @if (isNoticeExpanded(notice.id)) {
+              <div class="notice-content">
+                <div class="detail-grid">
+                  <div class="detail-item">
+                    <app-icon name="mosque" [size]="17" />
+                    <div>
+                      <strong>{{ notice.masjidName }}</strong>
+                      <span>{{ notice.masjidAddress }}</span>
+                    </div>
+                  </div>
+                  <div class="detail-item">
+                    <app-icon name="pin" [size]="17" />
+                    <div>
+                      <strong>{{ notice.qabristanName }}</strong>
+                      <span>{{ notice.qabristanAddress }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                @if (notice.notes) {
+                  <p class="notes">{{ notice.notes }}</p>
+                }
+              </div>
+            }
+          </article>
+        }
+      </div>
+    } @else {
+      <div class="empty-card">No Janazah notices posted for today.</div>
+    }
+  </section>
+
+  <section class="archive-section" aria-labelledby="previous-title">
+    <div class="section-row previous">
+      <h2 id="previous-title">Previous dates</h2>
+      <span>{{ previousNotices().length }} saved</span>
+    </div>
+
+    <div class="date-groups">
+      @for (group of previousGroups(); track group.date) {
+        <section class="date-block">
+          <div class="date-head compact">
+            <div>
+              <span>Previous</span>
+              <h2>{{ formatDate(group.date) }}</h2>
+            </div>
+            <div class="date-actions">
+              <strong>{{ group.notices.length }}</strong>
+            </div>
+          </div>
+
+          <div class="notice-stack">
+            @for (notice of group.notices; track notice.id) {
+              <article class="notice-card previous-card" role="button" tabindex="0" [class.open]="isNoticeExpanded(notice.id)" [attr.aria-expanded]="isNoticeExpanded(notice.id)" (click)="toggleNotice(notice.id)" (keydown.enter)="toggleNotice(notice.id)" (keydown.space)="toggleNotice(notice.id); $event.preventDefault()">
+                <div class="notice-head compact">
+                  <div>
+                    <div class="eyebrow">{{ notice.prayerName }} · {{ notice.prayerTime }}</div>
+                    <h3>{{ notice.name }}</h3>
+                  </div>
+                  <div class="notice-actions">
+                    <span>{{ notice.postedAt }}</span>
+                    <app-icon name="chevron" [size]="16" />
+                  </div>
+                </div>
+                @if (isNoticeExpanded(notice.id)) {
+                  <div class="notice-content">
+                  <div class="detail-item compact-detail">
+                    <app-icon name="mosque" [size]="16" />
+                    <div>
+                      <strong>{{ notice.masjidName }}</strong>
+                      <span>{{ notice.qabristanName }} · {{ notice.qabristanAddress }}</span>
+                    </div>
+                  </div>
+                  @if (notice.notes) {
+                    <p class="notes">{{ notice.notes }}</p>
+                  }
+                  </div>
+                }
+              </article>
+            }
+          </div>
+        </section>
+      }
+    </div>
+  </section>
+
+  <!-- <a class="community-link" [routerLink]="['/community']">
+    <span>Open community board</span>
+    <app-icon name="chevron" [size]="16" />
+  </a> -->
+</main>

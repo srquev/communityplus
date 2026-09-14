@@ -96,6 +96,15 @@ export interface JanazahNotice {
   id: string;
   name: string;
   detail: string;
+  date: string;
+  prayerName: string;
+  prayerTime: string;
+  masjidName: string;
+  masjidAddress: string;
+  qabristanName: string;
+  qabristanAddress: string;
+  notes?: string;
+  postedAt: string;
 }
 
 export interface NekiItem {

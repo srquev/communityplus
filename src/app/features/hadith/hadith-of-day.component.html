@@ -1,0 +1,53 @@
+<app-header-bar mode="page" title="Hadith of the Day" actionIcon="quote" />
+
+<main class="hadith-page">
+  <div class="intro">
+    <span class="eyebrow"><app-icon name="quote" [size]="14" /> Daily reflection</span>
+    <h1>Words to carry with you</h1>
+    <p>A short Hadith, selected for today.</p>
+  </div>
+
+  <article #shareCard class="hadith-card">
+    <div class="card-topline">
+      <span class="topic">{{ selectedHadith().topic }}</span>
+      <time>{{ displayDate(selectedHadith().daysAgo) }}</time>
+    </div>
+    <div class="quote-mark" aria-hidden="true">“</div>
+    <blockquote>{{ selectedHadith().text }}</blockquote>
+    <p class="narrator">{{ selectedHadith().narrator }}</p>
+    <footer class="reference">
+      <app-icon name="book" [size]="15" />
+      <span>Reference</span>
+      <strong>{{ selectedHadith().reference }}</strong>
+    </footer>
+  </article>
+
+  <div class="share-row">
+    <button type="button" class="share-card-btn" [disabled]="isSharing()" (click)="shareHadith()">
+      <app-icon name="share" [size]="16" />
+      <span>{{ isSharing() ? 'Preparing image...' : 'Share as image' }}</span>
+    </button>
+    @if (shareMessage()) {
+      <span class="share-message">{{ shareMessage() }}</span>
+    }
+  </div>
+
+  <section class="archive" aria-labelledby="previous-hadith-title">
+    <div class="section-heading">
+      <div>
+        <h2 id="previous-hadith-title">Previously shared</h2>
+        <p>Revisit earlier daily Hadith.</p>
+      </div>
+      <span>{{ entries.length }} entries</span>
+    </div>
+    <div class="history-list">
+      @for (entry of entries; track entry.id) {
+        <button type="button" class="history-item" [class.active]="selectedId() === entry.id" (click)="selectHadith(entry.id)">
+          <span class="history-date">{{ shortDate(entry.daysAgo) }}</span>
+          <span class="history-copy"><strong>{{ entry.topic }}</strong><small>{{ entry.reference }}</small></span>
+         <!-- <app-icon name="chevron" [size]="16" /> -->
+        </button>
+      }
+    </div>
+  </section>
+</main>
