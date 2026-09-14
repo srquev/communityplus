@@ -1,10 +1,18 @@
 import { Component, input } from '@angular/core';
-import { SkyBand } from '../../core/services/prayer.service';
+import { RouterLink } from '@angular/router';
+import { PrayerCountdownTone, PrayerMilestone, SkyBand } from '../../core/services/prayer.service';
 
 @Component({
   selector: 'app-sky-band',
+  imports: [RouterLink],
   template: `
-    <section class="sky-band" [class]="band()" aria-label="Prayer countdown" [style.--progress]="progressValue()">
+    <section
+      class="sky-band"
+      [class]="band()"
+      aria-label="Prayer countdown"
+      [style.--tone]="toneColor()"
+      [style.--tone-glow]="toneGlow()"
+    >
       <div class="atmosphere" aria-hidden="true">
         <span class="horizon-line"></span>
         <span class="time-disc"></span>
@@ -13,36 +21,56 @@ import { SkyBand } from '../../core/services/prayer.service';
 
       <div class="content">
         <div class="topline">
-          <span class="period">{{ periodLabel() }}</span>
-          <span class="live"><i></i> Live timing</span>
+          <span class="period">{{ dateLabel() }} · {{ hijriDate() }}</span>
         </div>
 
         <div class="hero-row">
           <div class="next-copy">
             <div class="eyebrow">Upcoming namaz</div>
-            <h2>{{ tag() }}</h2>
+            <h2>{{ displayPrayerName(tag()) }}</h2>
             <div class="next-time">{{ time() }}</div>
           </div>
 
-          <div class="countdown-panel">
-            <span>Time left</span>
+          <div class="countdown-panel" [class]="countdownTone()">
+            <span class="countdown-label"><i></i> Time left</span>
             <strong aria-live="polite">{{ countdown() }}</strong>
             <div class="pulse-rail" aria-hidden="true"><i></i></div>
           </div>
         </div>
 
-        <div class="context-row">
-          <span>{{ themeLine() }}</span>
-          <strong>{{ sub() }}</strong>
+        <div class="hadith-row">
+          <div class="hadith-copy">
+            <div class="hadith-head">
+              <span>Hadith of the Day</span>
+              <a [routerLink]="['/hod']">Read more</a>
+            </div>
+            <p>{{ hadithText() }}</p>
+          </div>
         </div>
       </div>
 
-      <div class="progress-wrap" aria-hidden="true">
-        <div class="progress-track">
-          <div class="progress-fill"></div>
-          <div class="progress-dot"></div>
-        </div>
-        <div class="arc-labels"><span>{{ startLabel() }}</span><span>{{ endLabel() }}</span></div>
+      <div class="prayer-strip" aria-label="Today's prayer status">
+        @for (milestone of milestones(); track milestone.name) {
+          <div
+            class="prayer-chip"
+            [class.done]="milestone.status === 'done'"
+            [class.active]="milestone.status === 'active'"
+            [class.next]="isNextPrayer(milestone)"
+          >
+            <span class="prayer-name">
+              {{ milestone.label }}
+            </span>
+            <span class="prayer-state">
+              @if (milestone.status === 'done') {
+                ✓
+              } @else if (milestone.status === 'active') {
+                Going on
+              } @else {
+                {{ milestone.time }}
+              }
+            </span>
+          </div>
+        }
       </div>
     </section>
   `,
@@ -57,12 +85,13 @@ import { SkyBand } from '../../core/services/prayer.service';
       border-radius: 22px;
       color: #fff;
       box-shadow: 0 20px 40px rgba(18, 21, 28, .18);
-      --progress: 0%;
       --line: rgba(255, 255, 255, .28);
       --glass: rgba(255, 255, 255, .12);
       --glass-strong: rgba(255, 255, 255, .18);
       --accent: #fff;
       --accent-soft: rgba(255, 255, 255, .72);
+      --tone: #aaffcb;
+      --tone-glow: rgba(170, 255, 203, .35);
     }
 
     .fajr {
@@ -89,7 +118,7 @@ import { SkyBand } from '../../core/services/prayer.service';
       --accent-soft: rgba(255, 229, 178, .8);
     }
 
-    .maghrib {
+    .maghrif {
       background:
         linear-gradient(160deg, rgba(255,255,255,.10), transparent 34%),
         linear-gradient(135deg, #34284f 0%, #a4495d 52%, #e88958 100%);
@@ -106,7 +135,7 @@ import { SkyBand } from '../../core/services/prayer.service';
     }
 
     .content,
-    .progress-wrap {
+    .prayer-strip {
       position: relative;
       z-index: 2;
     }
@@ -183,18 +212,21 @@ import { SkyBand } from '../../core/services/prayer.service';
 
     .topline,
     .hero-row,
-    .context-row,
-    .arc-labels {
+    .hadith-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
     }
 
+    .topline {
+      min-width: 0;
+      flex-wrap: nowrap;
+    }
+
     .period,
-    .live,
     .eyebrow,
-    .countdown-panel span {
+    .countdown-label {
       font-size: 10px;
       font-weight: 850;
       letter-spacing: .08em;
@@ -203,29 +235,30 @@ import { SkyBand } from '../../core/services/prayer.service';
 
     .period,
     .eyebrow,
-    .countdown-panel span {
+    .countdown-label {
       color: rgba(255, 255, 255, .72);
     }
 
-    .live {
+    .period {
+      overflow: hidden;
+      min-width: 0;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .countdown-label {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 5px 8px;
-      border: 1px solid rgba(255,255,255,.24);
-      border-radius: 999px;
-      background: rgba(8, 16, 32, .16);
-      color: rgba(255,255,255,.88);
-      letter-spacing: .05em;
-      backdrop-filter: blur(10px);
     }
 
-    .live i {
+    .countdown-label i {
       width: 6px;
       height: 6px;
+      flex: 0 0 6px;
       border-radius: 50%;
-      background: #aaffcb;
-      box-shadow: 0 0 0 0 rgba(170, 255, 203, .35);
+      background: var(--tone);
+      box-shadow: 0 0 0 0 var(--tone-glow);
       animation: livePulse 1.7s ease-out infinite;
     }
 
@@ -289,7 +322,7 @@ import { SkyBand } from '../../core/services/prayer.service';
       height: 3px;
       margin-top: 11px;
       border-radius: 999px;
-      background: rgba(255,255,255,.22);
+      background: rgba(255,255,255,.18);
     }
 
     .pulse-rail i {
@@ -297,12 +330,12 @@ import { SkyBand } from '../../core/services/prayer.service';
       inset: 0 auto 0 0;
       width: 42%;
       border-radius: inherit;
-      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      background: linear-gradient(90deg, transparent, var(--tone), transparent);
       animation: timeSweep 1.8s ease-in-out infinite;
     }
 
-    .context-row {
-      align-items: flex-start;
+    .hadith-row {
+      align-items: center;
       margin-top: 16px;
       padding-top: 12px;
       border-top: 1px solid rgba(255,255,255,.14);
@@ -311,53 +344,110 @@ import { SkyBand } from '../../core/services/prayer.service';
       line-height: 1.35;
     }
 
-    .context-row strong {
-      color: rgba(255,255,255,.92);
-      font-size: 11.5px;
-      font-weight: 750;
-      text-align: right;
+    .hadith-copy {
+      flex: 1;
+      min-width: 0;
     }
 
-    .progress-wrap {
-      margin-top: 15px;
+    .hadith-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
     }
 
-    .progress-track {
-      position: relative;
-      height: 5px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.24);
-      box-shadow: inset 0 1px 2px rgba(0,0,0,.12);
-    }
-
-    .progress-fill {
-      position: absolute;
-      inset: 0 auto 0 0;
-      width: var(--progress);
-      border-radius: inherit;
-      background: linear-gradient(90deg, rgba(255,255,255,.72), var(--accent));
-      transition: width .6s ease;
-    }
-
-    .progress-dot {
-      position: absolute;
-      top: 50%;
-      left: var(--progress);
-      width: 14px;
-      height: 14px;
-      border: 2px solid rgba(255,255,255,.9);
-      border-radius: 50%;
-      background: var(--accent);
-      transform: translate(-50%, -50%);
-      box-shadow: 0 0 0 5px rgba(255,255,255,.14);
-      transition: left .6s ease;
-    }
-
-    .arc-labels {
-      margin-top: 8px;
+    .hadith-head span {
       color: rgba(255,255,255,.72);
       font-size: 10px;
-      font-weight: 750;
+      font-weight: 850;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .hadith-copy p {
+      margin: 4px 0 0;
+      color: rgba(255,255,255,.9);
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 550;
+      line-height: 1.35;
+    }
+
+    .hadith-head a {
+      flex: 0 0 auto;
+      padding: 5px 8px;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 999px;
+      background: rgba(8, 16, 32, .16);
+      color: rgba(255,255,255,.92);
+      font-size: 11px;
+      font-weight: 850;
+      text-decoration: none;
+      text-align: right;
+      white-space: nowrap;
+      backdrop-filter: blur(10px);
+    }
+
+    .prayer-strip {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 6px;
+      margin-top: 18px;
+    }
+
+    .prayer-chip {
+      display: grid;
+      align-content: center;
+      gap: 4px;
+      min-width: 0;
+      min-height: 52px;
+      padding: 8px 4px;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 12px;
+      background: rgba(8, 16, 32, .14);
+      color: rgba(255,255,255,.72);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+      text-align: center;
+    }
+
+    .prayer-chip.done {
+      background: rgba(255,255,255,.14);
+      color: rgba(255,255,255,.9);
+    }
+
+    .prayer-chip.active {
+      border-color: rgba(255,255,255,.3);
+      background: rgba(255,255,255,.2);
+      color: #fff;
+    }
+
+    .prayer-chip.next {
+      border-color: var(--tone);
+      background: rgba(8, 16, 32, .18);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.1),
+        0 0 0 2px var(--tone-glow);
+      color: #fff;
+    }
+
+    .prayer-name,
+    .prayer-state {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .prayer-name {
+      font-size: 10px;
+      font-weight: 850;
+    }
+
+    .prayer-state {
+      font-size: 9.5px;
+      font-weight: 900;
     }
 
     @keyframes livePulse {
@@ -385,13 +475,7 @@ import { SkyBand } from '../../core/services/prayer.service';
         flex-basis: auto;
       }
 
-      .context-row {
-        flex-direction: column;
-      }
-
-      .context-row strong {
-        text-align: left;
-      }
+      .hadith-row { align-items: flex-start; }
     }
   `],
 })
@@ -399,33 +483,34 @@ export class SkyBandComponent {
   band = input.required<SkyBand>();
   tag = input.required<string>();
   time = input.required<string>();
-  sub = input.required<string>();
+  dateLabel = input('');
+  hijriDate = input('');
   countdown = input.required<string>();
-  progress = input(0);
-  startLabel = input('Fajr');
-  endLabel = input('Isha');
+  countdownTone = input<PrayerCountdownTone>('calm');
+  milestones = input<PrayerMilestone[]>([]);
+  hadithText = input('');
 
-  protected periodLabel(): string {
-    return {
-      fajr: 'Early morning',
-      zuhr: 'Noon',
-      asr: 'Afternoon',
-      maghrib: 'After sunset',
-      isha: 'Night',
-    }[this.band()];
+  protected displayPrayerName(name: string): string {
+    return name === 'Maghrif' ? 'Maghrif' : name;
   }
 
-  protected themeLine(): string {
-    return {
-      fajr: 'Fajr is proof that light always returns.',
-      zuhr: 'Pause, remember, and re-center your heart.',
-      asr: 'Guard the middle prayer as the afternoon wanes.',
-      maghrib: 'Let sunset open the door to evening peace.',
-      isha: 'End the day by leaving worries on the prayer mat.',
-    }[this.band()];
+  protected isNextPrayer(milestone: PrayerMilestone): boolean {
+    return milestone.status === 'upcoming' && milestone.label === this.displayPrayerName(this.tag());
   }
 
-  protected progressValue(): string {
-    return `${this.progress()}%`;
+  protected toneColor(): string {
+    return {
+      calm: '#aaffcb',
+      soon: '#ffd166',
+      urgent: '#ff8a80',
+    }[this.countdownTone()];
+  }
+
+  protected toneGlow(): string {
+    return {
+      calm: 'rgba(170, 255, 203, .35)',
+      soon: 'rgba(255, 209, 102, .38)',
+      urgent: 'rgba(255, 138, 128, .42)',
+    }[this.countdownTone()];
   }
 }

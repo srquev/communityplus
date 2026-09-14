@@ -1,5 +1,4 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { CommunityService } from '../../core/services/community.service';
 import { PrayerService } from '../../core/services/prayer.service';
 import { UserService } from '../../core/services/user.service';
@@ -12,7 +11,7 @@ import { IconComponent } from '../../shared/icon/icon.component';
   selector: 'app-home',
   imports: [
     HeaderBarComponent, SkyBandComponent, QuickActionsComponent,
-    IconComponent, RouterLink,
+    IconComponent,
   ],
   template: `
     <main class="home-screen">
@@ -20,51 +19,19 @@ import { IconComponent } from '../../shared/icon/icon.component';
 
       <app-sky-band
         [band]="prayer.skyBand()"
-        [tag]="prayer.nextPrayer().name"
+        [tag]="prayer.displayPrayerName(prayer.nextPrayer().name)"
         [time]="prayer.formatTime(prayer.nextPrayer().time)"
         [countdown]="prayer.countdownToNext()"
-        [sub]="prayer.activePrayer().name + ' is active · Ramadan Day ' + prayer.ramadanDay()"
-        [progress]="prayer.dayProgressPercent()"
+        [dateLabel]="skyDateLabel"
+        [hijriDate]="prayer.hijriDate()"
+        [countdownTone]="prayer.countdownTone()"
+        [milestones]="prayer.prayerMilestones()"
+        [hadithText]="dailyHadith.text"
       />
-
-      <section class="today-strip" aria-label="Today summary">
-        <div class="today-hadith">
-          <div class="quote-icon"><app-icon name="quote" [size]="16" /></div>
-          <div>
-            <div class="hadith-brief-head">
-              <span>Hadith of the Day</span>
-              <a [routerLink]="['/hod']">Read more</a>
-            </div>
-            <p>{{ dailyHadith.text }}</p>
-          </div>
-        </div>
-
-        <div class="briefing-rail">
-          <div class="briefing-main">
-            <span>{{ todayLabel }}</span>
-            <strong>{{ prayer.activePrayer().name }} active</strong>
-          </div>
-          <div class="briefing-item">
-            <span>Next</span>
-            <strong>{{ prayer.nextPrayer().name }}</strong>
-          </div>
-          <div class="briefing-item">
-            <span>Janazah</span>
-            <strong>{{ community.janazahNotices().length }}</strong>
-          </div>
-          <div class="briefing-item">
-            <span>Updates</span>
-            <strong>{{ community.news().length }}</strong>
-          </div>
-        </div>
-      </section>
 
       <section class="notice-section" aria-labelledby="janazah-title">
         <div class="home-section-head">
-          <div>
-            <span>Priority</span>
-            <h3 id="janazah-title">Janazah notices</h3>
-          </div>
+          <h3 id="janazah-title">Janazah notices</h3>
           @if (extraJanazahCount() > 0) {
             <button type="button" class="count-pill" (click)="toggleJanazahExpanded()" [attr.aria-expanded]="janazahExpanded()">
               {{ janazahExpanded() ? 'Top 2' : '+' + extraJanazahCount() }}
@@ -107,10 +74,7 @@ import { IconComponent } from '../../shared/icon/icon.component';
 
       <section class="notice-section updates-section" aria-labelledby="updates-title">
         <div class="home-section-head">
-          <div>
-            <span>Community</span>
-            <h3 id="updates-title">Latest updates</h3>
-          </div>
+          <h3 id="updates-title">Islamic updates</h3>
           @if (extraUpdatesCount() > 0) {
             <button type="button" class="count-pill emerald" (click)="toggleUpdatesExpanded()" [attr.aria-expanded]="updatesExpanded()">
               {{ updatesExpanded() ? 'Top 2' : '+' + extraUpdatesCount() }}
@@ -133,7 +97,6 @@ import { IconComponent } from '../../shared/icon/icon.component';
               <app-icon class="chevron" name="chevron" [size]="16" />
             </button>
           }
-          <!-- <a class="community-link" [routerLink]="['/community']">View community board</a> -->
         </div>
       </section>
 
@@ -142,8 +105,43 @@ import { IconComponent } from '../../shared/icon/icon.component';
           <span>Explore</span>
           <h3 id="shortcuts-title">Quick shortcuts</h3>
         </div>
-        <app-quick-actions [actions]="quickActions" />
+        <app-quick-actions [actions]="quickActions" (actionSelected)="onQuickAction($event)" />
       </section>
+
+      @if (showCalendarSheet()) {
+        <div class="calendar-overlay" (click)="closeCalendar()">
+          <section class="calendar-dialog" role="dialog" aria-modal="true" aria-labelledby="home-calendar-title" (click)="$event.stopPropagation()">
+            <div class="sheet-head">
+              <div>
+                <div class="calendar-meta">Today in the Islamic calendar</div>
+                <div class="calendar-title" id="home-calendar-title">{{ prayer.hijriDate() }}</div>
+              </div>
+              <button type="button" class="sheet-close" aria-label="Close calendar" (click)="closeCalendar()">×</button>
+            </div>
+            <div class="calendar-month">
+              <button type="button" class="month-nav previous" aria-label="Previous month" (click)="prayer.changeCalendarMonth(-1)"><app-icon name="chevron" [size]="16" /></button>
+              <span>{{ currentMonthLabel() }} · {{ hijriMonthLabel() }}</span>
+              <button type="button" class="month-nav" aria-label="Next month" (click)="prayer.changeCalendarMonth(1)"><app-icon name="chevron" [size]="16" /></button>
+            </div>
+            <button type="button" class="calendar-today" (click)="prayer.resetCalendarMonth()">Today</button>
+            <div class="weekday-row" aria-hidden="true">
+              @for (weekday of weekdays; track weekday) { <span>{{ weekday }}</span> }
+            </div>
+            <div class="calendar-grid">
+              @for (day of calendarCells(); track $index) {
+                @if (day) {
+                  <div class="calendar-day" [class.today]="day.isToday" [attr.aria-label]="day.englishDay + ' ' + day.month + ', Hijri ' + day.day">
+                    <span class="day-date">{{ day.englishDay }}</span>
+                    <span class="day-hijri">{{ day.day }}</span>
+                  </div>
+                } @else {
+                  <div class="calendar-empty" aria-hidden="true"></div>
+                }
+              }
+            </div>
+          </section>
+        </div>
+      }
 
       <!-- <a class="neki-card" [routerLink]="['/community']">
         <div class="banner-icon"><app-icon name="wall" [size]="20" /></div>
@@ -160,122 +158,8 @@ import { IconComponent } from '../../shared/icon/icon.component';
       padding-bottom: 22px;
     }
 
-    .today-strip {
-      margin: 12px 18px 0;
-      padding: 10px;
-      border: 1px solid rgba(27, 75, 67, .12);
-      border-radius: 20px;
-      background:
-        linear-gradient(145deg, rgba(255,255,255,.98), rgba(244,248,246,.9)),
-        var(--card);
-      box-shadow: 0 14px 28px rgba(18, 21, 28, .05);
-    }
-
-    .today-hadith {
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-      padding: 11px;
-      border-radius: 16px;
-      background: linear-gradient(135deg, var(--emerald-bg), rgba(255,255,255,.72));
-    }
-
-    .quote-icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 32px;
-      height: 32px;
-      flex: 0 0 32px;
-      border-radius: 10px;
-      background: rgba(27, 75, 67, .1);
-      color: var(--emerald);
-    }
-
-    .today-hadith span,
-    .briefing-rail span,
-    .home-section-head span {
-      color: var(--ink-soft);
-      font-size: 10px;
-      font-weight: 850;
-      letter-spacing: .055em;
-      text-transform: uppercase;
-    }
-
-    .hadith-brief-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .hadith-brief-head a {
-      color: var(--emerald);
-      font-size: 11.5px;
-      font-weight: 850;
-      white-space: nowrap;
-    }
-
-    .today-hadith p {
-      margin: 3px 0 0;
-      color: var(--ink);
-      font-family: var(--font-display);
-      font-size: 14px;
-      font-weight: 550;
-      line-height: 1.35;
-    }
-
-    .briefing-rail {
-      display: grid;
-      grid-template-columns: 1.4fr repeat(3, minmax(0, .72fr));
-      gap: 1px;
-      align-items: center;
-      overflow: hidden;
-      margin-top: 9px;
-      border: 1px solid rgba(27, 75, 67, .08);
-      border-radius: 15px;
-      background: rgba(27, 75, 67, .08);
-    }
-
-    .briefing-main,
-    .briefing-item {
-      min-width: 0;
-      padding: 9px 8px;
-      background: rgba(255, 255, 255, .72);
-    }
-
-    .briefing-main strong,
-    .briefing-item strong {
-      display: block;
-      overflow: hidden;
-      margin-top: 3px;
-      color: var(--ink);
-      font-size: 13px;
-      font-weight: 850;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .briefing-main strong {
-      color: var(--emerald);
-    }
-
-    .briefing-item {
-      text-align: center;
-    }
-
-    @media (max-width: 380px) {
-      .briefing-rail {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .briefing-item {
-        text-align: left;
-      }
-    }
-
     .notice-section {
-      margin-top: 6px;
+      margin-top: 8px;
     }
 
     .shortcut-section {
@@ -324,7 +208,6 @@ import { IconComponent } from '../../shared/icon/icon.component';
     }
 
     .home-section-head h3 {
-      margin-top: 2px;
       font-size: 17px;
       font-weight: 850;
       letter-spacing: 0;
@@ -385,11 +268,6 @@ import { IconComponent } from '../../shared/icon/icon.component';
       box-shadow: 0 12px 24px rgba(18, 21, 28, .06);
     }
 
-    .update-banner.open {
-      border-color: rgba(27, 75, 67, .28);
-      background: linear-gradient(135deg, var(--card), var(--emerald-bg));
-    }
-
     .banner-icon {
       display: flex;
       align-items: center;
@@ -405,6 +283,11 @@ import { IconComponent } from '../../shared/icon/icon.component';
     .janazah-banner .banner-icon {
       background: rgba(184, 90, 69, .12);
       color: var(--brick);
+    }
+
+    .update-banner.open {
+      border-color: rgba(27, 75, 67, .28);
+      background: linear-gradient(135deg, var(--card), var(--emerald-bg));
     }
 
     .banner-body {
@@ -483,6 +366,153 @@ import { IconComponent } from '../../shared/icon/icon.component';
     .neki-card {
       margin: 14px 18px 18px;
     }
+
+    .calendar-overlay {
+      position: fixed;
+      z-index: 40;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(18, 21, 28, .48);
+    }
+
+    .calendar-dialog {
+      width: min(100%, 380px);
+      max-height: calc(100dvh - 36px);
+      overflow: auto;
+      padding: 18px;
+      border-radius: 20px;
+      background: var(--card);
+      box-shadow: 0 24px 60px rgba(18, 21, 28, .26);
+    }
+
+    .sheet-head,
+    .calendar-month {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .sheet-close {
+      flex: 0 0 auto;
+      width: 32px;
+      height: 32px;
+      border: 0;
+      border-radius: 50%;
+      background: var(--cloud);
+      color: var(--ink-soft);
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .calendar-meta {
+      color: var(--ink-soft);
+      font-size: 10px;
+      font-weight: 850;
+      letter-spacing: .055em;
+      text-transform: uppercase;
+    }
+
+    .calendar-title {
+      margin-top: 2px;
+      color: var(--ink);
+      font-size: 15px;
+      font-weight: 850;
+    }
+
+    .calendar-month {
+      align-items: center;
+      margin: 18px 0 10px;
+      color: var(--emerald-ink);
+      font-size: 13px;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .month-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: var(--cloud);
+      color: var(--emerald-ink);
+    }
+
+    .month-nav.previous {
+      transform: rotate(180deg);
+    }
+
+    .calendar-today {
+      display: block;
+      margin: -3px auto 10px;
+      padding: 5px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--card);
+      color: var(--emerald-ink);
+      font: inherit;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .weekday-row,
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+    }
+
+    .weekday-row {
+      margin-bottom: 5px;
+      color: var(--ink-soft);
+      font-size: 10px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .calendar-grid {
+      gap: 4px;
+    }
+
+    .calendar-day {
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--cloud);
+    }
+
+    .calendar-day.today {
+      border-color: var(--emerald);
+      background: var(--emerald);
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(19, 112, 87, .22);
+    }
+
+    .day-date {
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .day-hijri {
+      color: var(--emerald-ink);
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .calendar-day.today .day-hijri {
+      color: rgba(255,255,255,.85);
+    }
   `],
 })
 export class HomeComponent {
@@ -490,6 +520,9 @@ export class HomeComponent {
   protected readonly community = inject(CommunityService);
   protected readonly user = inject(UserService);
   protected readonly todayLabel = new Date().toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+  protected readonly skyDateLabel = new Date().toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+  protected readonly weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  protected readonly showCalendarSheet = signal(false);
   protected readonly dailyHadith = {
     topic: 'Intentions',
     text: 'Actions are but by intentions, and every person will have but that which they intended.',
@@ -499,6 +532,15 @@ export class HomeComponent {
   protected readonly updatesExpanded = signal(false);
   private readonly openJanazahNotices = signal<Set<string>>(new Set());
   private readonly openUpdates = signal<Set<string>>(new Set());
+  protected readonly calendarCells = computed(() => {
+    const days = this.prayer.calendar();
+    const [firstDay] = days;
+    if (!firstDay) return [];
+
+    const [day, month, year] = firstDay.date.split('-').map(Number);
+    const leadingDays = new Date(year, month - 1, day).getDay();
+    return [...Array.from({ length: leadingDays }, () => null), ...days];
+  });
 
   protected readonly visibleJanazah = computed(() => {
     const notices = this.community.janazahNotices();
@@ -517,6 +559,7 @@ export class HomeComponent {
   protected readonly quickActions: QuickAction[] = [
     { icon: 'mosque', label: 'Mosques', route: '/mosques', description: 'Nearby masjids' },
     { icon: 'quiz', label: 'Quiz', route: '/quiz', description: 'Daily learning' },
+    { icon: 'calendar', label: 'Calendar', action: 'calendar', description: 'Hijri dates' },
     // { icon: 'store', label: 'Business', route: '/directory' },
     // { icon: 'hand', label: 'Volunteer', route: '/community' },
     // { icon: 'gift', label: 'Donate', route: '/community' },
@@ -560,5 +603,25 @@ export class HomeComponent {
       }
       return next;
     });
+  }
+
+  protected onQuickAction(action: QuickAction): void {
+    if (action.action === 'calendar') this.showCalendarSheet.set(true);
+  }
+
+  protected closeCalendar(): void {
+    this.showCalendarSheet.set(false);
+  }
+
+  protected currentMonthLabel(): string {
+    return this.prayer.calendarMonth().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  }
+
+  protected hijriMonthLabel(): string {
+    const firstDay = this.prayer.calendar()[0];
+    if (!firstDay) return 'اسلامی مہینہ';
+
+    const months = ['', 'محرم', 'صفر', 'ربیع الاول', 'ربیع الثانی', 'جمادی الاول', 'جمادی الثانی', 'رجب', 'شعبان', 'رمضان', 'شوال', 'ذوالقعدہ', 'ذوالحجہ'];
+    return `${months[firstDay.monthNumber] ?? firstDay.month} ${firstDay.year}`;
   }
 }

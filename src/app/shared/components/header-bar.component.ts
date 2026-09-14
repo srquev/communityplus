@@ -61,9 +61,7 @@ import { IconComponent } from '../icon/icon.component';
     .location-card {
       display: flex;
       align-items: center;
-      // gap: 8px;
       margin: 0;
-      // padding: 0 8px;
       border: 1px solid var(--line);
       border-radius: 16px;
       background: linear-gradient(135deg, var(--card), var(--cloud));
@@ -72,21 +70,14 @@ import { IconComponent } from '../icon/icon.component';
       min-width: 0;
       flex: 1;
     }
-    .select-row { display: flex; align-items: center;  min-width: 0; color: var(--emerald); }
-    .select-pill {
-      flex: 1; display: flex; min-width: 0; padding: 9px 8px;
-      border-radius: 12px; background: rgba(255,255,255,0.72);
-    }
+    .select-row { display: flex; align-items: center; min-width: 0; color: var(--emerald); }
+    .select-pill { flex: 1; display: flex; min-width: 0; padding: 9px 8px; border-radius: 12px; background: rgba(255,255,255,0.72); }
     .city-select {
       background: transparent; border: 0; color: var(--ink); font: inherit; font-weight: 700;
       padding: 0; outline: none; min-width: 0; width: 100%;
-      
     }
     .city-select option { color: var(--ink); }
-    .divider { width: 1px;
-    /* align-self: stretch; */
-    /* background: var(--line); */
-    margin-bottom: 20px;}
+    .divider { width: 1px; margin-bottom: 20px; }
     .icons { display: flex; gap: 8px; }
     .title { font-size: 15px; font-weight: 700; color: var(--ink); }
     .icon-btn {

@@ -57,7 +57,7 @@ src/app/
 ## Notable patterns
 
 - **`SkyBandComponent`** is the app's signature element — a gradient band
-  that shifts (fajr/zuhr/asr/maghrib/isha) with `PrayerService.skyBand()`
+  that shifts (fajr/zuhr/asr/maghrif/isha) with `PrayerService.skyBand()`
   and shows progress across the day via `dayProgressPercent()`. Both Home
   and Prayer consume it with different inputs.
 - **Route param binding**: `mosques/:id` and `directory/:id` resolve

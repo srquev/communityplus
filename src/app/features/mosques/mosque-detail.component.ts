@@ -31,7 +31,7 @@ import { IconComponent } from '../../shared/icon/icon.component';
         <div><div class="meta">Fajr</div><div class="title-sm">{{ m.timings.fajr }}</div></div>
         <div><div class="meta">Zuhr</div><div class="title-sm">{{ m.timings.zuhr }}</div></div>
         <div><div class="meta">Asr</div><div class="title-sm">{{ m.timings.asr }}</div></div>
-        <div><div class="meta">Maghrib</div><div class="title-sm">{{ m.timings.maghrib }}</div></div>
+        <div><div class="meta">Maghrif</div><div class="title-sm">{{ m.timings.maghrif }}</div></div>
         <div><div class="meta">Isha</div><div class="title-sm">{{ m.timings.isha }}</div></div>
         <div><div class="meta">Jumma</div><div class="title-sm">{{ m.timings.jumma }}</div></div>
       </div>

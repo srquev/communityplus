@@ -35,6 +35,13 @@ font-size: 12px;
   background: var(--emerald-bg); color: var(--emerald-ink); border-radius: 999px;
   padding: 6px 10px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
 }
+.live-card p {
+  max-width: 240px;
+  margin: 5px 0 0;
+  color: var(--ink-soft);
+  font-size: 11.5px;
+  line-height: 1.35;
+}
 .calendar-overlay { position: fixed; z-index: 20; inset: 0; display: flex; align-items: center; justify-content: center; padding: 18px; background: rgba(18, 21, 28, .48); }
 .calendar-dialog { width: min(100%, 380px); max-height: calc(100dvh - 36px); overflow: auto; padding: 18px; border-radius: 20px; background: var(--card); box-shadow: 0 24px 60px rgba(18, 21, 28, .26); }
 .sheet-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }

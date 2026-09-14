@@ -11,9 +11,17 @@ const PRAYER_ICONS: Record<string, string> = {
   Fajr: 'sunrise',
   Zuhr: 'sun',
   Asr: 'sunset',
-  Maghrib: 'moon',
+  Maghrif: 'moon',
   Isha: 'moonfilled',
   Tahajjud: 'moon-stars',
+};
+
+const PRAYER_REMINDERS: Record<string, string> = {
+  Fajr: 'Fajr is proof that light always returns.',
+  Zuhr: 'Pause, remember, and re-center your heart.',
+  Asr: 'Guard the middle prayer as the afternoon wanes.',
+  Maghrif: 'Let sunset open the door to evening peace.',
+  Isha: 'End the day by leaving worries on the prayer mat.',
 };
 
 @Component({
@@ -26,6 +34,7 @@ export class PrayerComponent {
   protected readonly prayer = inject(PrayerService);
   protected readonly user = inject(UserService);
   protected readonly prayerIcons = PRAYER_ICONS;
+  protected readonly prayerReminders = PRAYER_REMINDERS;
   protected readonly activeTab = signal('Today');
   protected readonly activeMapMasjid = signal<string | null>(null);
   protected readonly showCalendarSheet = signal(false);

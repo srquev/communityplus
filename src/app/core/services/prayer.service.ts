@@ -3,7 +3,16 @@ import { CITY_PRAYER_DATA } from '../data/mock-data';
 import { CityPrayerSchedule, PrayerDay, PrayerTiming } from '../models';
 import { UserService } from './user.service';
 
-export type SkyBand = 'fajr' | 'zuhr' | 'asr' | 'maghrib' | 'isha';
+export type SkyBand = 'fajr' | 'zuhr' | 'asr' | 'maghrif' | 'isha';
+export type PrayerMilestoneStatus = 'done' | 'active' | 'upcoming';
+export type PrayerCountdownTone = 'calm' | 'soon' | 'urgent';
+
+export interface PrayerMilestone {
+  name: string;
+  label: string;
+  time: string;
+  status: PrayerMilestoneStatus;
+}
 
 interface CalendarDay {
   date: string;
@@ -110,24 +119,41 @@ export class PrayerService {
 
   readonly countdownToNext = computed(() => this.formatCountdown(this.secondsToNext()));
 
+  readonly countdownTone = computed<PrayerCountdownTone>(() => {
+    const minutes = this.secondsToNext() / 60;
+    if (minutes <= 10) return 'urgent';
+    if (minutes <= 30) return 'soon';
+    return 'calm';
+  });
+
   readonly skyBand = computed<SkyBand>(() => {
     switch (this.activePrayer().name) {
       case 'Fajr': return 'fajr';
       case 'Zuhr': return 'zuhr';
       case 'Asr': return 'asr';
-      case 'Maghrib': return 'maghrib';
+      case 'Maghrif': return 'maghrif';
       default: return 'isha';
     }
   });
 
-  readonly dayProgressPercent = computed(() => {
+  readonly prayerMilestones = computed<PrayerMilestone[]>(() => {
     const timings = this.day().timings;
-    const start = toMinutes(timings[0].time);
-    const end = toMinutes(timings[timings.length - 1].time);
+    const activeName = this.activePrayer().name;
     const now = this.currentSeconds() / 60;
-    if (now <= start) return 0;
-    if (now >= end) return 100;
-    return Math.round(((now - start) / (end - start)) * 100);
+
+    return timings.map((timing) => {
+      const minutes = toMinutes(timing.time);
+      let status: PrayerMilestoneStatus = 'upcoming';
+      if (timing.name === activeName) status = 'active';
+      else if (minutes < now) status = 'done';
+
+      return {
+        name: timing.name,
+        label: this.displayPrayerName(timing.name),
+        time: this.formatTime(timing.time),
+        status,
+      };
+    });
   });
 
   formatTime(time: string): string {
@@ -135,6 +161,10 @@ export class PrayerService {
     const date = new Date();
     date.setHours(hours, minutes, 0, 0);
     return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  }
+
+  displayPrayerName(name: string): string {
+    return name === 'Maghrif' ? 'Maghrif' : name;
   }
 
   getMapUrl(address: string): string {
