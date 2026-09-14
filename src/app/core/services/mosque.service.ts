@@ -21,7 +21,7 @@ export class MosqueService {
         fajr: masjid.namazTimes.find((timing) => timing.name === 'Fajr')?.time ?? '04:00',
         zuhr: masjid.namazTimes.find((timing) => timing.name === 'Zuhr')?.time ?? '12:00',
         asr: masjid.namazTimes.find((timing) => timing.name === 'Asr')?.time ?? '16:00',
-        maghrib: masjid.namazTimes.find((timing) => timing.name === 'Maghrib')?.time ?? '18:00',
+        maghrif: masjid.namazTimes.find((timing) => timing.name === 'Maghrif')?.time ?? '18:00',
         isha: masjid.namazTimes.find((timing) => timing.name === 'Isha')?.time ?? '20:00',
         jumma: '13:15',
       },
