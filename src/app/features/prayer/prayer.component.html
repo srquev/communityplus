@@ -1,0 +1,189 @@
+<app-header-bar mode="page" title="Prayer & Islamic" actionIcon="calendar" (actionClick)="toggleCalendarSheet()" />
+<div class="city-picker-card">
+  <div class="picker-group">
+    <div class="picker-row">
+      <app-icon name="pin" [size]="16" />
+      <select id="city-select" class="city-picker" aria-label="Location" [value]="user.selectedCityId()" (change)="user.selectCity($any($event.target).value)">
+        @for (city of user.cities(); track city.id) {
+          <option [value]="city.id">{{ city.name }}</option>
+        }
+      </select>
+    </div>
+  </div>
+  <div class="picker-group">
+    <div class="picker-row">
+      <app-icon name="mosque" [size]="16" />
+      <select id="masjid-select" class="city-picker" aria-label="Masjid" [value]="user.selectedMasjidId() ?? ''" (change)="user.selectMasjid($any($event.target).value)">
+        @for (masjid of prayer.selectedSchedule().masjids; track masjid.id) {
+          <option [value]="masjid.id">{{ masjid.name }}</option>
+        }
+      </select>
+    </div>
+  </div>
+</div>
+<div class="live-card">
+  <div>
+    <div class="meta">Live timing</div>
+    <div class="title-sm">{{ now().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' }) }}</div>
+  </div>
+  <div class="live-pill">{{ prayer.activePrayer().name }} · {{ prayer.formatTime(prayer.activePrayer().time) }}</div>
+</div>
+
+@if (showCalendarSheet()) {
+  <div class="calendar-overlay" (click)="closeCalendar()">
+    <section class="calendar-dialog" role="dialog" aria-modal="true" aria-labelledby="calendar-title" (click)="$event.stopPropagation()">
+      <div class="sheet-head">
+        <div>
+          <div class="meta">Today in the Islamic calendar</div>
+          <div class="title-sm" id="calendar-title">{{ prayer.hijriDate() }}</div>
+        </div>
+        <button type="button" class="sheet-close" aria-label="Close calendar" (click)="closeCalendar()">×</button>
+      </div>
+      <div class="calendar-month">
+        <button type="button" class="month-nav previous" aria-label="Previous month" (click)="prayer.changeCalendarMonth(-1)"><app-icon name="chevron" [size]="16" /></button>
+        <span>{{ currentMonthLabel() }} · {{ hijriMonthLabel() }}</span>
+        <button type="button" class="month-nav" aria-label="Next month" (click)="prayer.changeCalendarMonth(1)"><app-icon name="chevron" [size]="16" /></button>
+      </div>
+      <button type="button" class="calendar-today" (click)="prayer.resetCalendarMonth()">Today</button>
+      <div class="weekday-row" aria-hidden="true">
+        @for (weekday of weekdays; track weekday) { <span>{{ weekday }}</span> }
+      </div>
+      <div class="calendar-grid">
+        @for (day of calendarCells(); track $index) {
+          @if (day) {
+            <div class="calendar-day" [class.today]="day.isToday" [attr.aria-label]="day.englishDay + ' ' + day.month + ', Hijri ' + day.day">
+              <span class="day-date">{{ day.englishDay }}</span>
+              <span class="day-hijri">{{ day.day }}</span>
+            </div>
+          } @else {
+            <div class="calendar-empty" aria-hidden="true"></div>
+          }
+        }
+      </div>
+      <div class="today-in-calendar">
+        <div class="calendar-key"><span></span> Hijri date shown below each English date</div>
+        <div class="calendar-footer-action"><button type="button" class="calendar-today" (click)="prayer.resetCalendarMonth()">Today</button></div>
+      </div>
+    </section>
+  </div>
+}
+
+<app-tabs [tabs]="['Today', 'Ramadan', 'Calendar']" [(active)]="activeTab" />
+
+@switch (activeTab()) {
+  @case ('Today') {
+    <app-section-header title="Today's timings" />
+    <div class="timing-list">
+      @for (t of prayer.timings(); track t.name) {
+        <div class="timing-row" [class.active]="t.name === prayer.activePrayer().name">
+          <div class="left">
+            <div class="icon-chip" [class.active]="t.name === prayer.activePrayer().name">
+              <app-icon [name]="prayerIcons[t.name]" [size]="18" />
+            </div>
+            <div class="title-sm">{{ t.name }}</div>
+          </div>
+          <div class="title-sm">{{ prayer.formatTime(t.time) }}</div>
+        </div>
+      }
+    </div>
+
+    <app-section-header title="Tahajjud prayer" />
+    <div class="tahajjud-card">
+      <div class="tahajjud-orb">
+        <app-icon [name]="prayerIcons['Tahajjud']" [size]="22" />
+      </div>
+      <div class="tahajjud-copy">
+        <div class="tahajjud-kicker">Night prayer</div>
+        <div class="title-sm">Tahajjud</div>
+        <p>Suggested time based on your local Fajr timing.</p>
+      </div>
+      <div class="tahajjud-time">{{ prayer.formatTime(prayer.tahajjud().time) }}</div>
+    </div>
+
+    <app-section-header title="Selected masjid" />
+    <div class="masjid-list">
+      @if (selectedMasjid(); as masjid) {
+        <div class="masjid-card">
+          <div class="masjid-header">
+            <div class="title-sm">{{ masjid.name }}</div>
+            <div class="meta">{{ masjid.address }}</div>
+          </div>
+          <button type="button" class="map-btn" (click)="toggleMap(masjid.id)">Show in map</button>
+          @if (activeMapMasjid() === masjid.id) {
+            <div class="map-shell">
+              <a class="map-link" [href]="prayer.getMapUrl(masjid.address)" target="_blank" rel="noopener noreferrer">Open in Google Maps / OpenStreetMap</a>
+            </div>
+          }
+          <div class="masjid-timings">
+            @for (timing of masjid.namazTimes; track timing.name) {
+              <div class="timing-pill">
+                <span class="timing-name">{{ timing.name }}</span>
+                <span class="timing-time">{{ prayer.formatTime(timing.time) }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <app-section-header title="Sehri & Iftar" />
+    <div class="card sehri-card">
+      <div class="col">
+        <div class="meta">Sehri ends</div>
+        <div class="title-sm sehri-time">{{ prayer.sehriEnd() }}</div>
+      </div>
+      <div class="rule"></div>
+      <div class="col">
+        <div class="meta">Iftar</div>
+        <div class="title-sm sehri-time">{{ prayer.iftar() }}</div>
+      </div>
+    </div>
+
+    <div class="notification-action">
+      <app-button variant="primary">
+        <app-icon name="bell" [size]="16" />
+        Enable prayer notifications
+      </app-button>
+    </div>
+  }
+  @case ('Ramadan') {
+    <div class="card ramadan-card">
+      <div class="title-sm">Ramadan Day {{ prayer.ramadanDay() }}</div>
+      <div class="meta ramadan-meta">
+        Sehri ends {{ prayer.sehriEnd() }} · Iftar {{ prayer.iftar() }}. Taraweeh timings are listed on each mosque's page.
+      </div>
+    </div>
+  }
+  @case ('Calendar') {
+    <section class="calendar-tab" aria-labelledby="calendar-tab-title">
+      <div class="calendar-tab-head">
+        <div class="meta">Today in the Islamic calendar</div>
+        <div class="title-sm" id="calendar-tab-title">{{ prayer.hijriDate() }}</div>
+      </div>
+      <div class="calendar-month">
+        <button type="button" class="month-nav previous" aria-label="Previous month" (click)="prayer.changeCalendarMonth(-1)"><app-icon name="chevron" [size]="16" /></button>
+        <span>{{ currentMonthLabel() }} · {{ hijriMonthLabel() }}</span>
+        <button type="button" class="month-nav" aria-label="Next month" (click)="prayer.changeCalendarMonth(1)"><app-icon name="chevron" [size]="16" /></button>
+      </div>
+      <div class="weekday-row" aria-hidden="true">
+        @for (weekday of weekdays; track weekday) { <span>{{ weekday }}</span> }
+      </div>
+      <div class="calendar-grid">
+        @for (day of calendarCells(); track $index) {
+          @if (day) {
+            <div class="calendar-day" [class.today]="day.isToday" [attr.aria-label]="day.englishDay + ' ' + day.month + ', Hijri ' + day.day">
+              <span class="day-date">{{ day.englishDay }}</span>
+              <span class="day-hijri">{{ day.day }}</span>
+            </div>
+          } @else {
+            <div class="calendar-empty" aria-hidden="true"></div>
+          }
+        }
+      </div>
+      <div class="today-in-calendar">
+        <div class="calendar-key"><span></span> Hijri date shown below each English date</div>
+        <div class="calendar-footer-action"><button type="button" class="calendar-today" (click)="prayer.resetCalendarMonth()">Today</button></div>
+      </div>
+    </section>
+  }
+}

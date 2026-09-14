@@ -1,0 +1,58 @@
+<app-header-bar mode="page" title="Community" actionIcon="plus" />
+
+<section class="janazah-panel">
+  <div class="janazah-head">
+    <div>
+      <div class="section-title">Janazah notices</div>
+      <div class="meta">Today and previous days' information</div>
+    </div>
+    <a [routerLink]="['/janazah']">View all</a>
+  </div>
+
+  @for (n of community.janazahNotices().slice(0, 2); track n.id) {
+    <a class="janazah" [routerLink]="['/janazah']">
+      <app-icon name="leaf" [size]="22" />
+      <div>
+        <div class="title-sm">{{ n.name }}</div>
+        <div class="meta">{{ n.prayerName }} · {{ n.prayerTime }} · {{ n.masjidName }}</div>
+      </div>
+      <app-icon name="chevron" [size]="16" />
+    </a>
+  }
+</section>
+
+<app-category-chips [options]="sections" [(selectedId)]="activeSection" />
+
+<!-- <app-section-header title="Neki Ki Deewar" linkLabel="Give / Take" />
+<div class="scroll-row neki-row">
+  @for (item of community.nekiItems(); track item.id) {
+    <div class="neki-card">
+      <div class="img"><app-icon name="shirt" [size]="24" /></div>
+      <div class="body">
+        <div class="title-sm">{{ item.title }}</div>
+        <div class="meta">Available · {{ item.distanceKm }} km</div>
+      </div>
+    </div>
+  }
+</div> -->
+
+<app-section-header title="Volunteer services" />
+@for (v of community.volunteers(); track v.id) {
+  <app-list-card [initials]="v.initials" [title]="v.name + ' — ' + v.service" [meta]="v.detail" />
+}
+
+<app-section-header title="Active donation campaigns" />
+@for (c of community.campaigns(); track c.id) {
+  <div class="card campaign-card">
+    <div class="title-sm">{{ c.title }}</div>
+    <div class="progress-track">
+      <div class="progress-fill" [style.width.%]="(c.raisedAmount / c.targetAmount) * 100"></div>
+    </div>
+    <div class="meta campaign-meta">
+      ₹{{ c.raisedAmount | number }} raised of ₹{{ c.targetAmount | number }}
+    </div>
+    <div class="campaign-action">
+      <app-button variant="gold">Donate now</app-button>
+    </div>
+  </div>
+}

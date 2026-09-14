@@ -24,7 +24,7 @@ import { BottomNavComponent } from '../shared/components/bottom-nav.component';
       // flex-direction: column;
       // background: var(--cloud);
       // box-shadow: 0 0 40px rgba(0,0,0,.08);
-      ax-width: var(--max-app-width);
+      max-width: var(--max-app-width);
     margin: 0 auto;
     height: 100dvh;
     display: flex;

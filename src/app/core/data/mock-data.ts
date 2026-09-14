@@ -593,10 +593,53 @@ export const BUSINESSES: Business[] = [
 export const COMMUNITY_NEWS: CommunityNotice[] = [
   { id: 'n1', title: 'Jumma khutbah shifted to 1:15 PM', body: 'Masjid-e-Noor has adjusted this week\u2019s khutbah timing.', postedAt: '2h ago' },
   { id: 'n2', title: 'Taraweeh streamed live tonight', body: 'Central Jama Masjid is livestreaming tonight\u2019s Taraweeh.', postedAt: '5h ago' },
+  { id: 'n3', title: 'Water supply work near Eidgah Road', body: 'Expect slow traffic around Eidgah Road until evening. Volunteers are helping manage parking near the masjid lane.', postedAt: 'Today' },
+  { id: 'n4', title: 'Community clinic open this Sunday', body: 'Free BP and sugar checkup will be available after Zuhr in the community hall.', postedAt: 'Yesterday' },
 ];
 
 export const JANAZAH_NOTICES: JanazahNotice[] = [
-  { id: 'j1', name: 'Abdul Rahman S.', detail: 'Namaz-e-Janazah after Asr, Masjid-e-Noor' },
+  {
+    id: 'j1',
+    name: 'Abdul Rahman S.',
+    detail: 'Namaz-e-Janazah after Asr, Masjid-e-Noor',
+    date: '2026-09-14',
+    prayerName: 'Asr',
+    prayerTime: '5:15 PM',
+    masjidName: 'Masjid-e-Noor',
+    masjidAddress: 'Noor Lane, Station Road',
+    qabristanName: 'Noor Qabristan',
+    qabristanAddress: 'Qabristan Road, near Old Eidgah',
+    notes: 'Family requests attendees to avoid bringing vehicles into the narrow lane.',
+    postedAt: '45m ago',
+  },
+  {
+    id: 'j2',
+    name: 'Amina Begum',
+    detail: 'Namaz-e-Janazah after Maghrib, Central Jama Masjid',
+    date: '2026-09-14',
+    prayerName: 'Maghrib',
+    prayerTime: '6:42 PM',
+    masjidName: 'Central Jama Masjid',
+    masjidAddress: 'Main Bazaar Road',
+    qabristanName: 'Purana Qabristan',
+    qabristanAddress: 'Old City Road, Gate 2',
+    notes: 'Women may gather at the family residence before Maghrib.',
+    postedAt: '1h ago',
+  },
+  {
+    id: 'j3',
+    name: 'Haji Kareemuddin',
+    detail: 'Namaz-e-Janazah after Zuhr, Bilal Masjid',
+    date: '2026-09-13',
+    prayerName: 'Zuhr',
+    prayerTime: '1:35 PM',
+    masjidName: 'Bilal Masjid',
+    masjidAddress: 'Mill Compound Road',
+    qabristanName: 'Bilal Qabristan',
+    qabristanAddress: 'Mill Road Extension',
+    notes: 'Dua gathering was held after Isha.',
+    postedAt: 'Yesterday',
+  },
 ];
 
 export const NEKI_ITEMS: NekiItem[] = [

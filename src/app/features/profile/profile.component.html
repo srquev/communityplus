@@ -1,0 +1,49 @@
+<app-header-bar mode="page" title="Profile" actionIcon="settings" />
+
+<div class="card profile-card">
+  <div class="avatar">{{ user.profile().initials }}</div>
+  <div>
+    <div class="title-sm profile-name">{{ user.profile().name }}</div>
+    <div class="meta">{{ user.profile().city }} · Member since {{ user.profile().memberSince }}</div>
+  </div>
+</div>
+
+<div class="card stats-card">
+  <div class="stat"><div class="title-sm">{{ user.profile().streak }}</div><div class="meta">day streak</div></div>
+  <div class="rule"></div>
+  <div class="stat"><div class="title-sm">{{ user.profile().donatedTotal }}</div><div class="meta">questions</div></div>
+  <div class="rule"></div>
+  <div class="stat"><div class="title-sm">{{ user.profile().badgeCount }}</div><div class="meta">badges</div></div>
+</div>
+
+<app-section-header title="Account" />
+<app-list-card icon="bell" title="Notifications">
+  <app-icon trailing name="chevron" [size]="18" />
+</app-list-card>
+
+<!--
+<a [routerLink]="['/onboarding']" class="profile-link">
+  <app-list-card icon="pin" title="City & language">
+    <app-icon trailing name="chevron" [size]="18" />
+  </app-list-card>
+</a>
+<a [routerLink]="['/directory']" class="profile-link">
+  <app-list-card icon="store" title="My business listing">
+    <app-icon trailing name="chevron" [size]="18" />
+  </app-list-card>
+</a>
+<app-list-card icon="gift" title="Donation history">
+  <app-icon trailing name="chevron" [size]="18" />
+</app-list-card>
+
+-->
+<app-list-card icon="shield" title="Privacy & security">
+  <app-icon trailing name="chevron" [size]="18" />
+</app-list-card>
+
+<div class="sign-out">
+  <app-button variant="outline">
+    <app-icon name="logout" [size]="16" />
+    Sign out
+  </app-button>
+</div>
