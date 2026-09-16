@@ -6,11 +6,11 @@
       <div class="section-title">Janazah notices</div>
       <div class="meta">Today and previous days' information</div>
     </div>
-    <a [routerLink]="['/janazah']">View all</a>
+    <a [routerLink]="['/updates']">View all</a>
   </div>
 
   @for (n of community.janazahNotices().slice(0, 2); track n.id) {
-    <a class="janazah" [routerLink]="['/janazah']">
+    <a class="janazah" [routerLink]="['/updates']">
       <app-icon name="leaf" [size]="22" />
       <div>
         <div class="title-sm">{{ n.name }}</div>

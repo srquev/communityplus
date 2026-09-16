@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { CommunityService } from '../../core/services/community.service';
+import { HadithService } from '../../core/services/hadith.service';
 import { PrayerService } from '../../core/services/prayer.service';
 import { UserService } from '../../core/services/user.service';
 import { HeaderBarComponent } from '../../shared/components/header-bar.component';
@@ -22,16 +23,16 @@ import { IconComponent } from '../../shared/icon/icon.component';
         [tag]="prayer.displayPrayerName(prayer.nextPrayer().name)"
         [time]="prayer.formatTime(prayer.nextPrayer().time)"
         [countdown]="prayer.countdownToNext()"
-        [dateLabel]="skyDateLabel"
-        [hijriDate]="prayer.hijriDate()"
+        [dateLabel]="prayer.currentDateTimeLabel()"
+        [hijriDate]="prayer.currentHijriDateDisplay()"
         [countdownTone]="prayer.countdownTone()"
         [milestones]="prayer.prayerMilestones()"
-        [hadithText]="dailyHadith.text"
+        [hadithText]="hadith.selectedHadith().text"
       />
 
       <section class="notice-section" aria-labelledby="janazah-title">
         <div class="home-section-head">
-          <h3 id="janazah-title">Janazah notices</h3>
+          <h3 id="janazah-title">Janazah Notices</h3>
           @if (extraJanazahCount() > 0) {
             <button type="button" class="count-pill" (click)="toggleJanazahExpanded()" [attr.aria-expanded]="janazahExpanded()">
               {{ janazahExpanded() ? 'Top 2' : '+' + extraJanazahCount() }}
@@ -74,7 +75,7 @@ import { IconComponent } from '../../shared/icon/icon.component';
 
       <section class="notice-section updates-section" aria-labelledby="updates-title">
         <div class="home-section-head">
-          <h3 id="updates-title">Islamic updates</h3>
+          <h3 id="updates-title">Updates</h3>
           @if (extraUpdatesCount() > 0) {
             <button type="button" class="count-pill emerald" (click)="toggleUpdatesExpanded()" [attr.aria-expanded]="updatesExpanded()">
               {{ updatesExpanded() ? 'Top 2' : '+' + extraUpdatesCount() }}
@@ -518,16 +519,11 @@ import { IconComponent } from '../../shared/icon/icon.component';
 export class HomeComponent {
   protected readonly prayer = inject(PrayerService);
   protected readonly community = inject(CommunityService);
+  protected readonly hadith = inject(HadithService);
   protected readonly user = inject(UserService);
   protected readonly todayLabel = new Date().toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
-  protected readonly skyDateLabel = new Date().toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
   protected readonly weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   protected readonly showCalendarSheet = signal(false);
-  protected readonly dailyHadith = {
-    topic: 'Intentions',
-    text: 'Actions are but by intentions, and every person will have but that which they intended.',
-    reference: 'Sahih al-Bukhari 1',
-  };
   protected readonly janazahExpanded = signal(false);
   protected readonly updatesExpanded = signal(false);
   private readonly openJanazahNotices = signal<Set<string>>(new Set());
@@ -564,6 +560,18 @@ export class HomeComponent {
     // { icon: 'hand', label: 'Volunteer', route: '/community' },
     // { icon: 'gift', label: 'Donate', route: '/community' },
   ];
+
+  constructor() {
+    this.user.loadCommunityPrayerData().subscribe({
+      next: (response) => console.log('loadCommunityPrayerData response:', response),
+      error: (error) => console.error('loadCommunityPrayerData error:', error),
+    });
+
+    this.hadith.loadHadithOfDay().subscribe({
+      next: (response) => console.log('loadHadithOfDay response:', response),
+      error: (error) => console.error('loadHadithOfDay error:', error),
+    });
+  }
 
   protected toggleJanazahExpanded(): void {
     this.janazahExpanded.update((isExpanded) => !isExpanded);

@@ -36,7 +36,6 @@ export class PrayerComponent {
   protected readonly prayerIcons = PRAYER_ICONS;
   protected readonly prayerReminders = PRAYER_REMINDERS;
   protected readonly activeTab = signal('Today');
-  protected readonly activeMapMasjid = signal<string | null>(null);
   protected readonly showCalendarSheet = signal(false);
   protected readonly now = signal(new Date());
   protected readonly weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -57,10 +56,6 @@ export class PrayerComponent {
 
   constructor() {
     setInterval(() => this.now.set(new Date()), 1000);
-  }
-
-  protected toggleMap(masjidId: string): void {
-    this.activeMapMasjid.set(this.activeMapMasjid() === masjidId ? null : masjidId);
   }
 
   protected toggleCalendarSheet(): void {

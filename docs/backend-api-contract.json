@@ -1,0 +1,134 @@
+{
+  "version": "1.0",
+  "notes": [
+    "Use 24-hour HH:mm time format for namaz timings.",
+    "Use ISO date YYYY-MM-DD for Janazah dates.",
+    "Use ISO datetime with timezone for postedAt when possible.",
+    "Use maghrib spelling in API responses."
+  ],
+  "apis": {
+    "cityNamazTimings": {
+      "method": "GET",
+      "path": "/api/cities/namaz-timings",
+      "description": "Returns city name, state, and namaz timings.",
+      "responseExample": {
+        "cities": [
+          {
+            "id": "mau",
+            "cityName": "Mau",
+            "state": "Uttar Pradesh",
+            "namazTimings": [
+              {
+                "key": "fajr",
+                "name": "Fajr",
+                "time": "05:30"
+              },
+              {
+                "key": "zuhr",
+                "name": "Zuhr",
+                "time": "13:15"
+              },
+              {
+                "key": "asr",
+                "name": "Asr",
+                "time": "17:00"
+              },
+              {
+                "key": "maghrib",
+                "name": "Maghrib",
+                "time": "18:15"
+              },
+              {
+                "key": "isha",
+                "name": "Isha",
+                "time": "20:30"
+              }
+            ]
+          },
+          {
+            "id": "lucknow",
+            "cityName": "Lucknow",
+            "state": "Uttar Pradesh",
+            "namazTimings": [
+              {
+                "key": "fajr",
+                "name": "Fajr",
+                "time": "04:48"
+              },
+              {
+                "key": "zuhr",
+                "name": "Zuhr",
+                "time": "12:39"
+              },
+              {
+                "key": "asr",
+                "name": "Asr",
+                "time": "16:35"
+              },
+              {
+                "key": "maghrib",
+                "name": "Maghrib",
+                "time": "18:47"
+              },
+              {
+                "key": "isha",
+                "name": "Isha",
+                "time": "20:08"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "updates": {
+      "method": "GET",
+      "path": "/api/updates?cityId=mau",
+      "description": "Returns Janazah updates and Islamic updates for a city.",
+      "responseExample": {
+        "cityId": "mau",
+        "janazahUpdates": [
+          {
+            "id": "j1",
+            "deceasedName": "Abdul Rahman S.",
+            "date": "2026-09-15",
+            "namazName": "Asr",
+            "namazTime": "17:15",
+            "masjidName": "Masjid-e-Noor",
+            "masjidAddress": "Noor Lane, Station Road",
+            "qabristanName": "Noor Qabristan",
+            "qabristanAddress": "Qabristan Road, near Old Eidgah",
+            "notes": "Family requests attendees to avoid bringing vehicles into the narrow lane.",
+            "postedAt": "2026-09-15T08:15:00+05:30"
+          },
+          {
+            "id": "j2",
+            "deceasedName": "Amina Begum",
+            "date": "2026-09-14",
+            "namazName": "Maghrib",
+            "namazTime": "18:42",
+            "masjidName": "Central Jama Masjid",
+            "masjidAddress": "Main Bazaar Road",
+            "qabristanName": "Purana Qabristan",
+            "qabristanAddress": "Old City Road, Gate 2",
+            "notes": "Women may gather at the family residence before Maghrib.",
+            "postedAt": "2026-09-14T17:30:00+05:30"
+          }
+        ],
+        "islamicUpdates": [
+          {
+            "id": "n1",
+            "title": "Jumma khutbah shifted to 1:15 PM",
+            "description": "Masjid-e-Noor has adjusted this week's khutbah timing.",
+            "postedAt": "2026-09-15T07:00:00+05:30"
+          },
+          {
+            "id": "n2",
+            "title": "Taraweeh streamed live tonight",
+            "description": "Central Jama Masjid is livestreaming tonight's Taraweeh.",
+            "postedAt": "2026-09-15T05:00:00+05:30"
+          }
+        ]
+      }
+    }
+  }
+}

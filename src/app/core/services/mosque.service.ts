@@ -1,15 +1,14 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { CITY_PRAYER_DATA } from '../data/mock-data';
 import { Mosque } from '../models';
 import { UserService } from './user.service';
 
 @Injectable({ providedIn: 'root' })
 export class MosqueService {
   private readonly user = inject(UserService);
-  private readonly citySchedules = signal(CITY_PRAYER_DATA);
 
   readonly all = computed<Mosque[]>(() => {
-    const selectedCity = this.citySchedules().find((item) => item.id === this.user.selectedCityId()) ?? this.citySchedules()[0];
+    const schedules = this.user.cityPrayerData();
+    const selectedCity = schedules.find((item) => item.id === this.user.selectedCityId()) ?? schedules[0];
     return selectedCity.masjids.map((masjid, index) => ({
       id: masjid.id,
       name: masjid.name,

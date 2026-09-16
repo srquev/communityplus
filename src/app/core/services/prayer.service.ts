@@ -1,5 +1,4 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { CITY_PRAYER_DATA } from '../data/mock-data';
 import { CityPrayerSchedule, PrayerDay, PrayerTiming } from '../models';
 import { UserService } from './user.service';
 
@@ -46,6 +45,22 @@ const HIJRI_MONTHS = [
   'Dhu al-Hijjah',
 ];
 
+const HIJRI_MONTHS_URDU = [
+  '',
+  'محرم',
+  'صفر',
+  'ربیع الاول',
+  'ربیع الثانی',
+  'جمادی الاول',
+  'جمادی الثانی',
+  'رجب',
+  'شعبان',
+  'رمضان',
+  'شوال',
+  'ذوالقعدہ',
+  'ذوالحجہ',
+];
+
 function toMinutes(time: string): number {
   const [h, m] = time.split(':').map(Number);
   return h * 60 + m;
@@ -54,7 +69,6 @@ function toMinutes(time: string): number {
 @Injectable({ providedIn: 'root' })
 export class PrayerService {
   private readonly user = inject(UserService);
-  private readonly schedules = signal<CityPrayerSchedule[]>(CITY_PRAYER_DATA);
   private readonly calendarMonthValue = signal(this.startOfMonth(new Date()));
   private readonly now = signal(new Date());
 
@@ -64,17 +78,40 @@ export class PrayerService {
 
   readonly day = computed<PrayerDay>(() => {
     const selectedCity = this.user.selectedCityId();
-    const schedule = this.schedules().find((item) => item.id === selectedCity) ?? this.schedules()[0];
+    const schedules = this.user.cityPrayerData();
+    const schedule = schedules.find((item) => item.id === selectedCity) ?? schedules[0];
+    const selectedMasjid = schedule.masjids.find((masjid) => masjid.id === this.user.selectedMasjidId()) ?? schedule.masjids[0];
+    const timings = selectedMasjid?.namazTimes.length ? selectedMasjid.namazTimes : schedule.timings;
     return {
       hijriDate: schedule.hijriDate,
       ramadanDay: schedule.ramadanDay,
-      sehriEnd: schedule.sehriEnd,
-      iftar: schedule.iftar,
-      timings: schedule.timings,
+      sehriEnd: timings.find((timing) => timing.name === 'Fajr')?.time ?? schedule.sehriEnd,
+      iftar: timings.find((timing) => timing.name === 'Maghrif')?.time ?? schedule.iftar,
+      timings,
     };
   });
 
   readonly timings = computed(() => this.day().timings);
+  readonly currentHijriDate = computed(() => this.toHijri(this.now()));
+  readonly currentDateTimeLabel = computed(() => (
+    this.now().toLocaleString('en-IN', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+      hour: 'numeric',
+      minute: '2-digit',
+    })
+  ));
+  readonly currentHijriDateEnglish = computed(() => {
+    const hijri = this.currentHijriDate();
+    return `${hijri.day} ${HIJRI_MONTHS[hijri.month] ?? 'Islamic month'} ${hijri.year}`;
+  });
+  readonly currentHijriDateUrdu = computed(() => {
+    const hijri = this.currentHijriDate();
+    const formatter = new Intl.NumberFormat('ur-IN', { useGrouping: false });
+    return `${formatter.format(hijri.day)} ${HIJRI_MONTHS_URDU[hijri.month] ?? 'اسلامی مہینہ'} ${formatter.format(hijri.year)}`;
+  });
+  readonly currentHijriDateDisplay = computed(() => `${this.currentHijriDateEnglish()}|${this.currentHijriDateUrdu()}`);
   readonly tahajjud = computed<PrayerTiming>(() => {
     const fajr = this.day().timings.find((timing) => timing.name === 'Fajr') ?? this.day().timings[0];
     return { name: 'Tahajjud', time: this.subtractMinutes(fajr.time, 90) };
@@ -83,7 +120,10 @@ export class PrayerService {
   readonly ramadanDay = computed(() => this.day().ramadanDay);
   readonly sehriEnd = computed(() => this.day().sehriEnd);
   readonly iftar = computed(() => this.day().iftar);
-  readonly selectedSchedule = computed(() => this.schedules().find((item) => item.id === this.user.selectedCityId()) ?? this.schedules()[0]);
+  readonly selectedSchedule = computed(() => {
+    const schedules = this.user.cityPrayerData();
+    return schedules.find((item) => item.id === this.user.selectedCityId()) ?? schedules[0];
+  });
   readonly calendar = computed(() => this.buildCalendar(this.calendarMonthValue()));
   readonly calendarMonth = computed(() => this.calendarMonthValue());
 
@@ -138,8 +178,9 @@ export class PrayerService {
 
   readonly prayerMilestones = computed<PrayerMilestone[]>(() => {
     const timings = this.day().timings;
-    const activeName = this.activePrayer().name;
     const now = this.currentSeconds() / 60;
+    const activePrayer = [...timings].reverse().find((timing) => toMinutes(timing.time) <= now);
+    const activeName = activePrayer?.name ?? null;
 
     return timings.map((timing) => {
       const minutes = toMinutes(timing.time);
@@ -164,11 +205,11 @@ export class PrayerService {
   }
 
   displayPrayerName(name: string): string {
-    return name === 'Maghrif' ? 'Maghrif' : name;
+    return name === 'Maghrif' ? 'Maghrib' : name;
   }
 
   getMapUrl(address: string): string {
-    return `https://www.openstreetmap.org/search?query=${encodeURIComponent(address)}`;
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
   }
 
   private buildCalendar(monthDate: Date): CalendarDay[] {

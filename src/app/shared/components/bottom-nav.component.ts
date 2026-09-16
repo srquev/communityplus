@@ -62,8 +62,8 @@ interface NavItem {
 export class BottomNavComponent {
   readonly items: NavItem[] = [
     { path: '/home', icon: 'home', label: 'Home' },
-    { path: '/prayer', icon: 'moon', label: 'Prayer' },
-    { path: '/janazah', icon: 'leaf', label: 'Janazah' },
+    { path: '/prayer', icon: 'moon', label: 'Salah' },
+    { path: '/updates', icon: 'megaphone', label: 'Updates' },
     { path: '/hod', icon: 'quote', label: 'Hadith' },
     { path: '/profile', icon: 'user', label: 'Profile' },
   ];
