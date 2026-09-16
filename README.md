@@ -45,7 +45,7 @@ src/app/
   shell/             ShellComponent — layout wrapper with the persistent bottom nav
   features/
     home/            Home screen
-    prayer/          Prayer & Islamic (Today / Ramadan / Calendar tabs)
+    prayer/          Salah & Islamic (Today / Ramadan / Calendar tabs)
     mosques/         Mosque list + detail
     directory/        Business directory list + detail
     community/        News, Janazah notices, Neki Ki Deewar, volunteers, donations
@@ -59,7 +59,7 @@ src/app/
 - **`SkyBandComponent`** is the app's signature element — a gradient band
   that shifts (fajr/zuhr/asr/maghrif/isha) with `PrayerService.skyBand()`
   and shows progress across the day via `dayProgressPercent()`. Both Home
-  and Prayer consume it with different inputs.
+  and Salah consume it with different inputs.
 - **Route param binding**: `mosques/:id` and `directory/:id` resolve
   straight into a signal `id = input.required<string>()` on the detail
   components via `withComponentInputBinding()` in `app.config.ts` — no

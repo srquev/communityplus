@@ -1,11 +1,11 @@
-<app-header-bar mode="page" title="Prayer & Islamic" actionIcon="calendar" (actionClick)="toggleCalendarSheet()" />
+<app-header-bar mode="page" title="Salah Timing" actionIcon="calendar" (actionClick)="toggleCalendarSheet()" />
 <div class="city-picker-card">
   <div class="picker-group">
     <div class="picker-row">
       <app-icon name="pin" [size]="16" />
       <select id="city-select" class="city-picker" aria-label="Location" [value]="user.selectedCityId()" (change)="user.selectCity($any($event.target).value)">
         @for (city of user.cities(); track city.id) {
-          <option [value]="city.id">{{ city.name }}</option>
+          <option [value]="city.id" [selected]="city.id === user.selectedCityId()">{{ city.name }}</option>
         }
       </select>
     </div>
@@ -15,7 +15,7 @@
       <app-icon name="mosque" [size]="16" />
       <select id="masjid-select" class="city-picker" aria-label="Masjid" [value]="user.selectedMasjidId() ?? ''" (change)="user.selectMasjid($any($event.target).value)">
         @for (masjid of prayer.selectedSchedule().masjids; track masjid.id) {
-          <option [value]="masjid.id">{{ masjid.name }}</option>
+          <option [value]="masjid.id" [selected]="masjid.id === user.selectedMasjidId()">{{ masjid.name }}</option>
         }
       </select>
     </div>
@@ -73,21 +73,6 @@
 
 @switch (activeTab()) {
   @case ('Today') {
-    <app-section-header title="Today's timings" />
-    <div class="timing-list">
-      @for (t of prayer.timings(); track t.name) {
-        <div class="timing-row" [class.active]="t.name === prayer.activePrayer().name">
-          <div class="left">
-            <div class="icon-chip" [class.active]="t.name === prayer.activePrayer().name">
-              <app-icon [name]="prayerIcons[t.name]" [size]="18" />
-            </div>
-            <div class="title-sm">{{ t.name }}</div>
-          </div>
-          <div class="title-sm">{{ prayer.formatTime(t.time) }}</div>
-        </div>
-      }
-    </div>
-
     <app-section-header title="Tahajjud prayer" />
     <div class="tahajjud-card">
       <div class="tahajjud-orb">
@@ -109,12 +94,10 @@
             <div class="title-sm">{{ masjid.name }}</div>
             <div class="meta">{{ masjid.address }}</div>
           </div>
-          <button type="button" class="map-btn" (click)="toggleMap(masjid.id)">Show in map</button>
-          @if (activeMapMasjid() === masjid.id) {
-            <div class="map-shell">
-              <a class="map-link" [href]="prayer.getMapUrl(masjid.address)" target="_blank" rel="noopener noreferrer">Open in Google Maps / OpenStreetMap</a>
-            </div>
-          }
+          <a class="map-btn" [href]="prayer.getMapUrl(masjid.address)" target="_blank" rel="noopener noreferrer" aria-label="Open selected masjid in Google Maps">
+            <app-icon name="map" [size]="14" />
+            Open in Google Maps
+          </a>
           <div class="masjid-timings">
             @for (timing of masjid.namazTimes; track timing.name) {
               <div class="timing-pill">

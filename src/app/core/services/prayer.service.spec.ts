@@ -17,10 +17,18 @@ describe('PrayerService', () => {
   });
 
   it('updates the active prayer timings when the selected city changes', () => {
-    expect(service.timings()[0].time).toBe('04:48');
+    expect(service.timings()[0].time).toBe('05:30');
 
     userService.selectCity('kanpur');
 
     expect(service.timings()[0].time).toBe('04:47');
+  });
+
+  it('uses the selected masjid timings for shared prayer data', () => {
+    userService.selectCity('mau');
+    userService.selectMasjid('jama-masjid-mau');
+
+    expect(service.timings()[0].time).toBe('04:00');
+    expect(service.sehriEnd()).toBe('04:00');
   });
 });

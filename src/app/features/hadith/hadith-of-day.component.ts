@@ -1,33 +1,7 @@
-import { Component, ElementRef, ViewChild, computed, signal } from '@angular/core';
+import { Component, ElementRef, ViewChild, inject, signal } from '@angular/core';
+import { HadithService } from '../../core/services/hadith.service';
 import { HeaderBarComponent } from '../../shared/components/header-bar.component';
 import { IconComponent } from '../../shared/icon/icon.component';
-
-interface HadithEntry {
-  id: string;
-  daysAgo: number;
-  topic: string;
-  text: string;
-  narrator: string;
-  reference: string;
-}
-
-const HADITH_ENTRIES: HadithEntry[] = [
-  {
-    id: 'intentions', daysAgo: 0, topic: 'Intentions',
-    text: 'Actions are but by intentions, and every person will have but that which they intended.',
-    narrator: 'Narrated by Umar ibn Al-Khattab (RA)', reference: 'Sahih al-Bukhari 1',
-  },
-  {
-    id: 'speech', daysAgo: 1, topic: 'Good speech',
-    text: 'Whoever believes in Allah and the Last Day should speak what is good or remain silent.',
-    narrator: 'Narrated by Abu Huraira (RA)', reference: 'Sahih al-Bukhari 6018',
-  },
-  {
-    id: 'cleanliness', daysAgo: 2, topic: 'Purification',
-    text: 'Cleanliness is half of faith.',
-    narrator: 'Reported by Abu Malik al-Ash‘ari (RA)', reference: 'Sahih Muslim 223',
-  },
-];
 
 @Component({
   selector: 'app-hadith-of-day',
@@ -38,14 +12,22 @@ const HADITH_ENTRIES: HadithEntry[] = [
 export class HadithOfDayComponent {
   @ViewChild('shareCard') private shareCard?: ElementRef<HTMLElement>;
 
-  protected readonly entries = HADITH_ENTRIES;
-  protected readonly selectedId = signal(HADITH_ENTRIES[0].id);
-  protected readonly selectedHadith = computed(() => HADITH_ENTRIES.find((entry) => entry.id === this.selectedId()) ?? HADITH_ENTRIES[0]);
+  protected readonly hadith = inject(HadithService);
+  protected readonly entries = this.hadith.entries;
+  protected readonly selectedId = this.hadith.selectedHadithId;
+  protected readonly selectedHadith = this.hadith.selectedHadith;
   protected readonly isSharing = signal(false);
   protected readonly shareMessage = signal('');
 
+  constructor() {
+    this.hadith.loadHadithOfDay().subscribe({
+      next: (response) => console.log('loadHadithOfDay response:', response),
+      error: (error) => console.error('loadHadithOfDay error:', error),
+    });
+  }
+
   protected selectHadith(id: string): void {
-    this.selectedId.set(id);
+    this.hadith.selectHadith(id);
   }
 
   protected async shareHadith(): Promise<void> {

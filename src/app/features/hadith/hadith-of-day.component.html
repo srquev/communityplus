@@ -38,10 +38,10 @@
         <h2 id="previous-hadith-title">Previously shared</h2>
         <p>Revisit earlier daily Hadith.</p>
       </div>
-      <span>{{ entries.length }} entries</span>
+      <span>{{ entries().length }} entries</span>
     </div>
     <div class="history-list">
-      @for (entry of entries; track entry.id) {
+      @for (entry of entries(); track entry.id) {
         <button type="button" class="history-item" [class.active]="selectedId() === entry.id" (click)="selectHadith(entry.id)">
           <span class="history-date">{{ shortDate(entry.daysAgo) }}</span>
           <span class="history-copy"><strong>{{ entry.topic }}</strong><small>{{ entry.reference }}</small></span>

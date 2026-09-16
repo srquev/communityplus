@@ -94,6 +94,13 @@ export class QuizComponent {
   protected readonly quiz = inject(QuizService);
   protected readonly letters = ['A', 'B', 'C', 'D'];
 
+  constructor() {
+    this.quiz.loadQuiz().subscribe({
+      next: (response) => console.log('loadQuiz response:', response),
+      error: (error) => console.error('loadQuiz error:', error),
+    });
+  }
+
   protected ringStyle() {
     return `conic-gradient(var(--gold) 0deg ${this.quiz.streakRingDegrees()}deg, var(--line) ${this.quiz.streakRingDegrees()}deg 360deg)`;
   }

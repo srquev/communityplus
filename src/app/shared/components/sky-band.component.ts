@@ -9,19 +9,25 @@ import { PrayerCountdownTone, PrayerMilestone, SkyBand } from '../../core/servic
     <section
       class="sky-band"
       [class]="band()"
-      aria-label="Prayer countdown"
+      aria-label="Salah countdown"
       [style.--tone]="toneColor()"
       [style.--tone-glow]="toneGlow()"
     >
       <div class="atmosphere" aria-hidden="true">
-        <span class="horizon-line"></span>
         <span class="time-disc"></span>
         <span class="star-field"></span>
       </div>
 
       <div class="content">
         <div class="topline">
-          <span class="period">{{ dateLabel() }} · {{ hijriDate() }}</span>
+          <div class="date-block">
+            <span class="date-kicker">Today</span>
+            <span class="date-value">{{ dateLabel() }}</span>
+          </div>
+          <div class="hijri-block" dir="auto">
+            <span class="hijri-value">{{ hijriDateEnglish() }}</span>
+            <span class="hijri-alias">{{ hijriDateUrdu() }}</span>
+          </div>
         </div>
 
         <div class="hero-row">
@@ -159,16 +165,6 @@ import { PrayerCountdownTone, PrayerMilestone, SkyBand } from '../../core/servic
       content: '';
     }
 
-    .horizon-line {
-      position: absolute;
-      right: -20%;
-      bottom: 28px;
-      left: -12%;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,.42), transparent);
-      transform: rotate(-6deg);
-    }
-
     .time-disc {
       position: absolute;
       right: 18px;
@@ -224,7 +220,8 @@ import { PrayerCountdownTone, PrayerMilestone, SkyBand } from '../../core/servic
       flex-wrap: nowrap;
     }
 
-    .period,
+    .date-kicker,
+    .hijri-alias,
     .eyebrow,
     .countdown-label {
       font-size: 10px;
@@ -233,17 +230,54 @@ import { PrayerCountdownTone, PrayerMilestone, SkyBand } from '../../core/servic
       text-transform: uppercase;
     }
 
-    .period,
+    .date-kicker,
+    .hijri-alias,
     .eyebrow,
     .countdown-label {
       color: rgba(255, 255, 255, .72);
     }
 
-    .period {
+    .date-block,
+    .hijri-block {
+      display: grid;
+      min-width: 0;
+      gap: 3px;
+    }
+
+    .date-block {
+      flex: 1 1 auto;
+    }
+
+    .hijri-block {
+      flex: 0 1 46%;
+      justify-items: end;
+      text-align: right;
+    }
+
+    .date-value,
+    .hijri-value,
+    .hijri-alias {
       overflow: hidden;
       min-width: 0;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+
+    .date-value,
+    .hijri-value {
+      color: rgba(255, 255, 255, .96);
+      font-size: 12px;
+      font-weight: 850;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    .hijri-alias {
+      max-width: 100%;
+      font-size: 10.5px;
+      letter-spacing: 0;
+      text-transform: none;
+      direction: rtl;
     }
 
     .countdown-label {
@@ -467,6 +501,23 @@ import { PrayerCountdownTone, PrayerMilestone, SkyBand } from '../../core/servic
     }
 
     @media (max-width: 360px) {
+      .topline {
+        gap: 8px;
+      }
+
+      .hijri-block {
+        flex-basis: 42%;
+      }
+
+      .date-value,
+      .hijri-value {
+        font-size: 11px;
+      }
+
+      .hijri-alias {
+        font-size: 9.5px;
+      }
+
       .hero-row {
         flex-direction: column;
       }
@@ -491,11 +542,19 @@ export class SkyBandComponent {
   hadithText = input('');
 
   protected displayPrayerName(name: string): string {
-    return name === 'Maghrif' ? 'Maghrif' : name;
+    return name === 'Maghrif' ? 'Maghrib' : name;
   }
 
   protected isNextPrayer(milestone: PrayerMilestone): boolean {
     return milestone.status === 'upcoming' && milestone.label === this.displayPrayerName(this.tag());
+  }
+
+  protected hijriDateEnglish(): string {
+    return this.hijriDate().split('|')[0] ?? this.hijriDate();
+  }
+
+  protected hijriDateUrdu(): string {
+    return this.hijriDate().split('|')[1] ?? '';
   }
 
   protected toneColor(): string {
